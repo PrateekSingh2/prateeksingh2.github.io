@@ -13,8 +13,7 @@
             background: #fff0f5;
             overflow: hidden;
             position: relative;
-            /* Pure page ke background me image */
-            background-image: url('bg.png');
+            background-image: url('bg.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -24,8 +23,7 @@
             z-index: 2;
             max-width: 520px;
             margin: 60px auto 0 auto;
-            /* Opaque frame - background image abhan dikhegi */
-            background: rgba(255,255,255,0.96); /* thoda soft white (ya 1 kar do super solid ke liye) */
+            background: rgba(255,255,255,0.96);
             border-radius: 20px;
             box-shadow: 0 4px 32px rgba(76,0,68,0.11);
             text-align: center;
@@ -51,6 +49,7 @@
             line-height: 1.63;
             color: #572c8e;
             margin: 0 0 12px 0;
+            word-break: break-word;
         }
         .confetti {
             position: fixed;
@@ -61,10 +60,27 @@
             height: 100vh;
             z-index: 1;
         }
-        @media (max-width: 540px) {
-            .container { padding: 17px 2vw 17px 2vw; }
-            h1 { font-size: 1.7rem; }
-            img { width: 130px; height: 130px; }
+        @media (max-width: 600px) {
+            .container {
+                max-width: 96vw;
+                margin: 16vw auto 0 auto;
+                padding: 8vw 2vw 8vw 2vw;
+                border-radius: 3vw;
+            }
+            img {
+                width: 38vw;
+                height: 38vw;
+                border-width: 2vw;
+                margin-bottom: 4vw;
+            }
+            h1 {
+                font-size: 1.46rem;
+                margin-top: 3vw;
+                margin-bottom: 2vw;
+            }
+            p {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -77,7 +93,7 @@
         <p>Har lamha tumse juda pyaar badhta rahe, yehhi meri dua hai. Janamdin mubarak ho meri pyari!</p>
     </div>
     <script>
-        // CONFETTI ANIMATION - Slow
+        // CONFETTI ANIMATION - Slowed
         const confetti = document.querySelector('.confetti');
         const ctx = confetti.getContext('2d');
         let W = window.innerWidth, H = window.innerHeight;
@@ -99,7 +115,7 @@
                 this.tilt = randomInt(-25, 25);
                 this.tiltAngleIncremental = (Math.random() * 0.10) + .03;
                 this.tiltAngle = 0;
-                this.speed = randomInt(10, 35) / 10; // 1.0 to 3.5 - slow
+                this.speed = randomInt(10, 35) / 10; // 1.0 to 3.5
             }
             draw() {
                 ctx.beginPath();
@@ -141,7 +157,7 @@
             confetti.height = H;
         });
     </script>
-    <!-- Cool fonts for stylish look -->
+    <!-- Stylish fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 </body>
 </html>
