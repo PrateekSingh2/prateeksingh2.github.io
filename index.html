@@ -1,101 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yes or No</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: lightpink;
-    }
-
-    .container {
-        text-align: center;
-    }
-
-    h1 {
-        color: #333;
-    }
-
-    h2 {
-        color: #666;
-    }
-
-    img {
-        width: 200px; /* Increased width for better visibility */
-        height: auto;
-        margin-top: 4px; /* Adjusted top margin for image */
-    }
-
-    button {
-        background: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 10px;
-        margin: 10px; /* Added margin around buttons */
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, My Love!</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Poppins', Arial, sans-serif;
+            background: #fff0f5;
+            overflow: hidden;
+            position: relative;
+            /* Pure page ke background me image */
+            background-image: url('bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 520px;
+            margin: 60px auto 0 auto;
+            /* Opaque frame - background image abhan dikhegi */
+            background: rgba(255,255,255,0.96); /* thoda soft white (ya 1 kar do super solid ke liye) */
+            border-radius: 20px;
+            box-shadow: 0 4px 32px rgba(76,0,68,0.11);
+            text-align: center;
+            padding: 45px 24px 40px 24px;
+        }
+        img {
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 6px solid #ffb6c1;
+            margin-bottom: 18px;
+            box-shadow: 0 8px 36px rgba(255,182,193,0.2);
+        }
+        h1 {
+            font-size: 2.4rem;
+            margin: 15px 0 12px 0;
+            font-family: 'Caveat', cursive;
+            color: #b03170;
+        }
+        p {
+            font-size: 1.22rem;
+            line-height: 1.63;
+            color: #572c8e;
+            margin: 0 0 12px 0;
+        }
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        @media (max-width: 540px) {
+            .container { padding: 17px 2vw 17px 2vw; }
+            h1 { font-size: 1.7rem; }
+            img { width: 130px; height: 130px; }
+        }
+    </style>
 </head>
 <body>
+    <canvas class="confetti"></canvas>
+    <div class="container">
+        <img src="wife-photo.jpg" alt="My Love">
+        <h1>Happy Birthday, My Beloved!</h1>
+        <p>Tum meri zindagi mein wo roshni ho jo har andhere ko mita deti hai. Tumhara pyaar meri taakat hai, aur tumhari muskaan mera sukoon. Aaj ka din sirf tumhara nahi, hamari khushiyon ka din hai.</p>
+        <p>Har lamha tumse juda pyaar badhta rahe, yehhi meri dua hai. Janamdin mubarak ho meri pyari!</p>
+    </div>
+    <script>
+        // CONFETTI ANIMATION - Slow
+        const confetti = document.querySelector('.confetti');
+        const ctx = confetti.getContext('2d');
+        let W = window.innerWidth, H = window.innerHeight;
+        confetti.width = W;
+        confetti.height = H;
 
-<div class="container">
-    <h1>Hey bio wali, do you love me? 😊</h1>
-    <h2>Please say yes!</h2>
-    <img id="image" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYmNzZTFsMWlmNWNqYjVuN2IxaTA0aGp3ZG13ZGc3MDh3aHdkMzFuZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/c76IJLufpNwSULPk77/giphy.gif" alt="Placeholder Image">
-    <br>
-    <button id="yesButton">Yes</button>
-    <button id="noButton">No</button>
-</div>
+        const colors = ['#ffb6c1', '#ff69b4', '#a6c1ee', '#dda0dd', '#a5dee5', '#fbc2eb', '#fdffb6', '#bde0fe', '#fbbfca'];
 
-<script>
-    let clickCount = 0;
-
-    const yesButton = document.getElementById('yesButton');
-    const noButton = document.getElementById('noButton');
-    const heading = document.querySelector('h1');
-    const subheading = document.querySelector('h2');
-    const image = document.getElementById('image');
-
-    const imageUrls = [
-        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOWZsMDB1dGI5N2djNjk4OHE4bDRudzd6YmIzZ3IyY2oxaGczZTZwbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/gDfteqLchLcRTtjAD7/giphy.gif',
-        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMTltY3oxb2hxa3g1bmQ1cmthYm5lcnBpMWM1ZWdpbXhtaWFobTRjOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/M90mJvfWfd5mbUuULX/giphy.gif',
-        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNWg4Y3Frc3locThqN3Z0OTUzN2dyZHQxY3F3Ym92bzFnN3RycHE5bSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/eiRpSPB8OSGVcbkOIJ/giphy.gif',
-        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG54c3J1cXNybThtb2VycGpmbW5paHppcDB0Z2Njd2xxMjN3MXJoMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6gDZ9unSrDk3EuR2/giphy.gif',
-        'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnVzZ3U1N2JodG1rMTU5dHVhOHYzM3liaDF3eDR1eGJ1N3YweWgyYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9X8UlqKhaSPz4n7BkW/giphy.gif',
-    ];
-
-    noButton.addEventListener('click', () => {
-        clickCount++;
-        if (clickCount < imageUrls.length) {
-            heading.textContent = "Soch lo ek baar aur?";
-            subheading.textContent = `Click "yes".`;
-            image.src = imageUrls[clickCount];
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
         }
-        if (clickCount === imageUrls.length - 1) {
-            heading.textContent = "Ab kya karogi miss?";
-            subheading.textContent = `Ab to "Yes" kar do.`;
-            noButton.style.display = "none";
-            yesButton.style.display = "inline-block";
+
+        class ConfettiPiece {
+            constructor() {
+                this.x = randomInt(0, W);
+                this.y = randomInt(-H, 0);
+                this.radius = randomInt(7, 18);
+                this.color = colors[randomInt(0, colors.length - 1)];
+                this.tilt = randomInt(-25, 25);
+                this.tiltAngleIncremental = (Math.random() * 0.10) + .03;
+                this.tiltAngle = 0;
+                this.speed = randomInt(10, 35) / 10; // 1.0 to 3.5 - slow
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.y * 0.003) * 2;
+                this.tiltAngle += this.tiltAngleIncremental;
+                this.tilt = Math.sin(this.tiltAngle) * 24;
+                if (this.y > H + 30) {
+                    this.x = randomInt(0, W);
+                    this.y = randomInt(-40, -10);
+                }
+            }
         }
-    });
 
-    yesButton.addEventListener('click', () => {
-        heading.textContent = "Hehe😁 mujhe pta tha!";
-        subheading.textContent = "I love you";
-        image.src = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGM3MW92Zms4a3ZtamxibnZidHB1d3FoMWVzdmE3bzhxZWppaWN2OCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/bA5cblwksWXDOwSzUI/giphy.gif";
-        yesButton.disabled = true;
-        noButton.disabled = true;
-        yesButton.style.display = "none";
-        noButton.style.display = "none";
-    });
-</script>
+        let pieces = [];
+        for(let i = 0; i < 89; i++) {
+            pieces.push(new ConfettiPiece());
+        }
 
+        function animate(){
+            ctx.clearRect(0,0,W,H);
+            for(let piece of pieces){
+                piece.draw();
+                piece.update();
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('resize', ()=>{
+            W = window.innerWidth;
+            H = window.innerHeight;
+            confetti.width = W;
+            confetti.height = H;
+        });
+    </script>
+    <!-- Cool fonts for stylish look -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 </body>
 </html>
