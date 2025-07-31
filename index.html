@@ -10,7 +10,6 @@
             padding: 0;
             min-height: 100vh;
             font-family: 'Poppins', Arial, sans-serif;
-            background: #fff0f5;
             overflow: hidden;
             position: relative;
             background-image: url('bg.png');
@@ -23,11 +22,12 @@
             z-index: 2;
             max-width: 520px;
             margin: 60px auto 0 auto;
-            background: rgba(255,255,255,0.96);
+            background: rgba(255,255,255,0.32); /* glassy white */
             border-radius: 20px;
             box-shadow: 0 4px 32px rgba(76,0,68,0.11);
             text-align: center;
             padding: 45px 24px 40px 24px;
+            backdrop-filter: blur(6px); /* modern glass effect */
         }
         img {
             width: 190px;
@@ -93,7 +93,7 @@
         <p>Har lamha tumse juda pyaar badhta rahe, yehhi meri dua hai. Janamdin mubarak ho meri pyari!</p>
     </div>
     <script>
-        // CONFETTI ANIMATION - Slowed
+        // CONFETTI ANIMATION - Glassy Theme, Slow, Responsive
         const confetti = document.querySelector('.confetti');
         const ctx = confetti.getContext('2d');
         let W = window.innerWidth, H = window.innerHeight;
@@ -157,7 +157,7 @@
             confetti.height = H;
         });
     </script>
-    <!-- Stylish fonts -->
+    <!-- Premium fonts for look -->
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 </body>
 </html>
