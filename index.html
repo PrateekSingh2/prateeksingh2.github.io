@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SilentWarrior | The Stealth Mode Innovators</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #fff6ed;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #111;
+      cursor: pointer;
+    }
+
+    .drop-area {
+      border: 3px dashed #111;
+      border-radius: 15px;
+      padding: 40px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .drop-area.dragover {
+      background: #ffe3c4;
+      border-color: #333;
+    }
+
+    .drop-area p {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .drop-area input {
+      display: none;
+    }
+
+    .preview {
+      margin-top: 20px;
+    }
+
+    .preview img {
+      max-width: 250px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Next Button */
+    .next-btn {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 30px;
+      background: #111;
+      color: #fff6ed;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .next-btn:hover {
+      background: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <img src="https://i.ibb.co/nqttFCqH/Chat-GPT-Image-Sep-10-2025-12-44-53-AM.png" alt="SilentWarrior Logo">
+      <span>SilentWarrior</span>
+    </div>
+
+    <nav>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <p class="announcement">
+      🚀 <strong>SilentWarrior V3 - Innovating in stealth</strong>, now live with smarter solutions.
+    </p>
+    <h1 class="brand">Cattle and buffaloes recognition</h1>
+    <h2 class="tagline">99% confident result using ML trained model</h2>
+
+    <div class="buttons">
+      <!-- Upload Image Button -->
+      <button id="openModal" class="btn primary">Upload Image</button>
+      <!-- About Model Button -->
+      <a href="#about" class="btn secondary">About Model</a>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about">
+    <h2>About Us</h2>
+    <p>
+      SilentWarrior is built on the philosophy that true innovation thrives quietly.  
+      We design, develop, and deliver solutions that remain unseen yet powerful,  
+      enabling businesses to rise above the competition—strategically and silently.
+    </p>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="services">
+    <h2>What We Do</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Stealth Innovation</h3>
+        <p>Cutting-edge solutions designed to operate under the radar with maximum impact.</p>
+      </div>
+      <div class="card">
+        <h3>Future-Ready Tech</h3>
+        <p>Creating adaptive systems that are built for tomorrow's challenges.</p>
+      </div>
+      <div class="card">
+        <h3>Strategic Partnerships</h3>
+        <p>Collaborating with forward-thinkers to innovate beyond visible limits.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact">
+    <h2>Get in Touch</h2>
+    <p>Ready to shape the future in stealth mode? Let's collaborate.</p>
+    <a href="mailto:contact@silentwarrior.com" class="btn primary">Contact Us</a>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 SilentWarrior. All Rights Reserved.</p>
+  </footer>
+
+  <!-- Modal (Upload Area) -->
+  <div class="modal" id="uploadModal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeModal">&times;</span>
+      <h2>Upload Image</h2>
+
+      <div class="drop-area" id="drop-area">
+        <p>Drag & Drop your image here<br>or click to browse</p>
+        <input type="file" id="fileInput" accept="image/*">
+      </div>
+
+      <div class="preview" id="preview"></div>
+
+      <!-- Next Button -->
+      <button class="next-btn">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("uploadModal");
+    const openModal = document.getElementById("openModal");
+    const closeModal = document.getElementById("closeModal");
+    const dropArea = document.getElementById("drop-area");
+    const fileInput = document.getElementById("fileInput");
+    const preview = document.getElementById("preview");
+
+    // Open modal
+    openModal.addEventListener("click", () => {
+      modal.style.display = "flex";
+    });
+
+    // Close modal
+    closeModal.addEventListener("click", () => {
+      modal.style.display = "none";
+      preview.innerHTML = "";
+    });
+
+    // Close if clicked outside
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+        preview.innerHTML = "";
+      }
+    });
+
+    // Click to browse
+    dropArea.addEventListener("click", () => fileInput.click());
+
+    // File input
+    fileInput.addEventListener("change", () => {
+      handleFile(fileInput.files[0]);
+    });
+
+    // Drag events
+    dropArea.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropArea.classList.add("dragover");
+    });
+
+    dropArea.addEventListener("dragleave", () => {
+      dropArea.classList.remove("dragover");
+    });
+
+    dropArea.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropArea.classList.remove("dragover");
+      handleFile(e.dataTransfer.files[0]);
+    });
+
+    // Handle file preview
+    function handleFile(file) {
+        if (file && file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.innerHTML = `<img src="${e.target.result}" alt="Uploaded Image">`;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert("Please upload a valid image file.");
+        }
+    }
+    </script>
+
+</body>
+</html>
