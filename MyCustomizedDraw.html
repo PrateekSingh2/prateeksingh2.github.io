@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCustomizedDraw</title>
+    <!-- Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Virgil&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a1a; /* Deeper dark mode body background */
+            overflow: hidden; /* Prevent body scroll, canvas handles scroll/pan */
+        }
+        #drawingCanvas {
+            touch-action: none; /* Disable default touch actions like scrolling */
+            cursor: crosshair;
+            background-color: #262626; /* Darker background for the visible canvas area */
+        }
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2a2a2a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+
+        /* Tool active state */
+        .tool-active {
+            background-color: #555 !important; /* Slightly lighter gray for active tool */
+            box-shadow: 0 0 0 2px rgba(85, 85, 85, 0.5); /* Subtle shadow */
+        }
+
+        /* Side panel styling */
+        .side-panel {
+            width: 250px;
+            background-color: #2a2a2a; /* Panel background */
+            color: #ccc;
+            border-right: 1px solid #3a3a3a;
+        }
+
+        /* Textarea for editing */
+        #tempTextarea {
+            position: absolute;
+            background: #262626; /* Canvas background for editor */
+            color: #eee;
+            border: 1px solid #00aaff; /* Excalidraw blue border */
+            padding: 4px;
+            resize: none;
+            overflow: hidden;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-family: 'Virgil', cursive; /* Sketchy font for text elements */
+            z-index: 100; /* Ensure it's above canvas */
+            transform-origin: 0 0; /* Scale from top-left */
+            font-size: 16px; /* Base font size, will scale */
+            line-height: 1.5; /* Default line height */
+        }
+        
+        /* Specific input styling for dark mode */
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: transparent;
+            width: 30px;
+            height: 30px;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid #555;
+            border-radius: 4px;
+        }
+        input[type="color"]::-moz-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-moz-color-swatch {
+            border: 1px solid #555;
+            border-radius: 4px;
+        }
+
+        /* Range slider styling */
+        input[type="range"] {
+            /*-webkit-appearance: none;*/
+            width: 100px;
+            height: 4px;
+            background: #555;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+            border-radius: 2px;
+        }
+
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #00aaff; /* Excalidraw blue */
+            cursor: pointer;
+            box-shadow: 0 0 0 2px #2a2a2a;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #00aaff;
+            cursor: pointer;
+            box-shadow: 0 0 0 2px #2a2a2a;
+        }
+    </style>
+</head>
+<body class="dark bg-gray-900 text-gray-100 font-sans h-screen flex flex-col">
+
+    <!-- Top Toolbar --><header class="flex-shrink-0 bg-[#2a2a2a] p-2 flex items-center justify-between border-b border-[#3a3a3a] shadow-lg relative z-20">
+        <!-- Left Section (Menu, App Name) --><div class="flex items-center space-x-4">
+            <button class="p-2 rounded hover:bg-[#3a3a3a]">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <span class="text-lg font-bold text-[#00aaff]">Excalidraw Clone (Pro)</span>
+        </div>
+
+        <!-- Center Section (Tools) --><div class="flex items-center space-x-1 p-1 bg-[#3a3a3a] rounded-lg shadow-inner">
+            <button id="tool_selection" data-tool="selection" class="p-2 rounded hover:bg-[#4a4a4a]" title="Selection (V)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.18 7.18l-3.32-1.32a2.25 2.25 0 00-2.25 2.25l1.32 3.32m0 0l3-3m-3 3l3-3m-3 3l3-3"></path></svg>
+            </button>
+            <button id="tool_rectangle" data-tool="rectangle" class="p-2 rounded hover:bg-[#4a4a4a]" title="Rectangle (R)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 18h16M4 6v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z"></path></svg>
+            </button>
+            <button id="tool_circle" data-tool="circle" class="p-2 rounded hover:bg-[#4a4a4a]" title="Circle (O)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"></path></svg>
+            </button>
+            <button id="tool_diamond" data-tool="diamond" class="p-2 rounded hover:bg-[#4a4a4a]" title="Diamond (D)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2L2 12l10 10 10-10L12 2z"></path></svg>
+            </button>
+            <button id="tool_arrow" data-tool="arrow" class="p-2 rounded hover:bg-[#4a4a4a]" title="Arrow (A)">
+                <svg class="w-6 h-6 rotate-45 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+            </button>
+            <button id="tool_line" data-tool="line" class="p-2 rounded hover:bg-[#4a4a4a]" title="Line (L)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16L16 4"></path></svg>
+            </button>
+            <button id="tool_freehand" data-tool="freehand" class="p-2 rounded hover:bg-[#4a4a4a] tool-active" title="Freehand (P)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7l10 10m0-10l-10 10m-3-4v4a2 2 0 002 2h4l-4-4zm12 0l-4 4h4a2 2 0 002-2v-4z"></path></svg>
+            </button>
+            <button id="tool_text" data-tool="text" class="p-2 rounded hover:bg-[#4a4a4a]" title="Text (T)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18M10 7l4 10M12 4v16"></path></svg>
+            </button>
+            <button id="tool_eraser" data-tool="eraser" class="p-2 rounded hover:bg-[#4a4a4a]" title="Eraser (E)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.865 10.375A2 2 0 0116.138 21H7.862a2 2 0 01-1.997-1.625L5 7m5 4v6m4-6v6M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M6 7h12"></path></svg>
+            </button>
+            <button id="tool_hand" data-tool="hand" class="p-2 rounded hover:bg-[#4a4a4a]" title="Hand (H)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+            </button>
+        </div>
+
+        <!-- Right Section (Share, Library, Undo/Redo, Export/Import) --><div class="flex items-center space-x-2">
+            <button class="p-2 rounded hover:bg-[#3a3a3a]">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+            </button>
+            <button id="undoButton" class="p-2 rounded hover:bg-[#3a3a3a]" title="Undo (Ctrl+Z)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.18 7.18l-3.32-1.32a2.25 2.25 0 00-2.25 2.25l1.32 3.32m0 0l3-3m-3 3l3-3m-3 3l3-3"></path></svg>
+            </button>
+            <button id="redoButton" class="p-2 rounded hover:bg-[#3a3a3a]" title="Redo (Ctrl+Y)">
+                <svg class="w-6 h-6 text-[#ccc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15l2-5 4 4-11-4 5-2zm0 0l-5-5m16.82-1.82l3.32 1.32a2.25 2.25 0 002.25-2.25l-1.32-3.32m0 0l-3 3m3-3l-3 3m3-3l-3 3"></path></svg>
+            </button>
+            <button id="exportButton" class="px-3 py-2 text-sm bg-[#00aaff] text-white rounded-md hover:bg-[#0099ee] transition font-semibold">
+                <svg class="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                Export
+            </button>
+            <input type="file" id="importFile" accept=".json" class="hidden">
+            <button id="importButton" class="px-3 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 transition font-semibold">
+                <svg class="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Import
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area (Side Panel + Canvas) --><div class="flex flex-1 relative">
+        <!-- Left Side Panel (Properties) --><aside class="side-panel flex flex-col p-4 space-y-4 shadow-xl z-10 overflow-y-auto">
+            <h3 class="text-white font-semibold text-lg border-b border-[#3a3a3a] pb-2">Properties</h3>
+
+            <!-- Stroke Color --><div class="flex flex-col space-y-2">
+                <label class="text-sm font-medium">Stroke</label>
+                <div class="flex flex-wrap gap-2">
+                    <input type="color" id="strokeColorPicker" value="#ffffff" class="w-7 h-7">
+                    <div id="presetColors" class="flex gap-1">
+                        <!-- Example Preset Colors --><button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#dc2626]" data-color="#dc2626"></button>
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#f97316]" data-color="#f97316"></button>
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#fcd34d]" data-color="#fcd34d"></button>
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#16a34a]" data-color="#16a34a"></button>
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#0ea5e9]" data-color="#0ea5e9"></button>
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#8b5cf6]" data-color="#8b5cf6"></button>
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#f472b6]" data-color="#f472b6"></button>
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#444444]" data-color="#444444"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Background Color --><div class="flex flex-col space-y-2">
+                <label class="text-sm font-medium">Background</label>
+                <div class="flex flex-wrap gap-2">
+                    <input type="color" id="bgColorPicker" value="#262626" class="w-7 h-7">
+                    <div id="presetBgColors" class="flex gap-1">
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#1a1a1a]" data-color="#1a1a1a"></button>
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#262626]" data-color="#262626"></button>
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#444444]" data-color="#444444"></button>
+                        <button class="w-7 h-7 rounded-md border border-[#3a3a3a] bg-[#fef3c7]" data-color="#fef3c7"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stroke Width --><div class="flex flex-col space-y-2">
+                <label for="strokeWidthSlider" class="text-sm font-medium">Stroke width: <span id="currentStrokeWidth">3</span>px</label>
+                <input type="range" id="strokeWidthSlider" min="1" max="10" value="3">
+            </div>
+
+            <!-- Opacity --><div class="flex flex-col space-y-2">
+                <label for="opacitySlider" class="text-sm font-medium">Opacity: <span id="currentOpacity">100</span>%</label>
+                <input type="range" id="opacitySlider" min="0" max="100" value="100">
+            </div>
+
+            <!-- Layers (placeholder for now) --><div class="flex flex-col space-y-2 pt-4 border-t border-[#3a3a3a]">
+                <label class="text-sm font-medium">Layers</label>
+                <div class="flex space-x-2">
+                    <button class="p-2 rounded hover:bg-[#4a4a4a] text-[#ccc]" title="Bring to Front">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                    </button>
+                    <button class="p-2 rounded hover:bg-[#4a4a4a] text-[#ccc]" title="Bring Forward">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-4 8v-4m-4 8v-4m-4 8v-4m16 4v-4M4 7h16M4 11h16M4 15h16M4 19h16"></path></svg>
+                    </button>
+                    <button class="p-2 rounded hover:bg-[#4a4a4a] text-[#ccc]" title="Send Backward">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                    </button>
+                    <button class="p-2 rounded hover:bg-[#4a4a4a] text-[#ccc]" title="Send to Back">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-4 8v-4m-4 8v-4m-4 8v-4m16 4v-4M4 7h16M4 11h16M4 15h16M4 19h16"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Canvas Area --><main class="flex-1 relative overflow-hidden">
+            <canvas id="drawingCanvas" class="w-full h-full"></canvas>
+            <textarea id="tempTextarea" class="hidden"></textarea>
+        </main>
+    </div>
+
+    <!-- Bottom Bar (Zoom Controls) --><footer class="flex-shrink-0 bg-[#2a2a2a] p-2 flex items-center justify-between border-t border-[#3a3a3a] shadow-lg z-20">
+        <div class="flex items-center space-x-2 text-sm text-[#ccc]">
+            <span id="zoomPercentage">100%</span>
+            <button id="zoomOutButton" class="p-1 rounded hover:bg-[#3a3a3a]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+            </button>
+            <button id="zoomInButton" class="p-1 rounded hover:bg-[#3a3a3a]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            </button>
+            <button id="resetZoomButton" class="p-1 rounded hover:bg-[#3a3a3a]" title="Reset Zoom">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20V4M4 12h16"></path></svg>
+            </button>
+        </div>
+        <div class="text-sm text-[#ccc]">
+            Scroll back to content (placeholder)
+        </div>
+    </footer>
+
+    <script>
+        // --- Start of New, Final JavaScript Code ---
+
+        // --- Core Application State & Canvas Setup ---
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        const tempTextarea = document.getElementById('tempTextarea');
+
+        // World-to-Screen Transformation State (Unlimited Canvas)
+        let translateX = 0;
+        let translateY = 0;
+        let scale = 1;
+        const MIN_SCALE = 0.1;
+        const MAX_SCALE = 10.0;
+        const ZOOM_FACTOR = 1.1; // Amount to zoom in/out with each step
+
+        // Drawing State
+        let elements = [];
+        let isDrawing = false;
+        let isPanning = false;
+        let currentElement = null;
+        let selectedElement = null; // New state to track the element being moved/resized
+        let dragOffset = { x: 0, y: 0 }; // Offset to prevent jump when starting drag
+        let textElementData = null; // Global state for the element currently being edited as text
+        let startPoint = [0, 0];
+        let lastPanX = 0;
+        let lastPanY = 0;
+
+        // Configuration state
+        let strokeColor = '#ffffff';
+        let backgroundColor = '#262626'; // Default canvas background
+        let strokeWidth = 3;
+        let roughness = 1.0; // Added roughness control
+        let opacity = 1.0;
+        let currentTool = 'freehand'; // Default tool as requested
+
+        const FONT_FAMILY = 'Kalam, cursive'; // CORRECT FONT: Kalam for the smoother, thicker hand-drawn look
+        const DEFAULT_TEXT_SIZE = 20; // Base font size for professionalism
+
+        // History for Undo/Redo
+        let history = [];
+        let historyPointer = -1;
+
+        // --- Utility Functions ---
+
+        function saveHistory() {
+            if (historyPointer < history.length - 1) {
+                history = history.slice(0, historyPointer + 1);
+            }
+            history.push(JSON.parse(JSON.stringify(elements))); // Deep clone
+            historyPointer++;
+        }
+
+        function undo() {
+            if (historyPointer > 0) {
+                historyPointer--;
+                elements = JSON.parse(JSON.stringify(history[historyPointer]));
+                selectedElement = null;
+                redraw();
+            }
+        }
+
+        function redo() {
+            if (historyPointer < history.length - 1) {
+                historyPointer++;
+                elements = JSON.parse(JSON.stringify(history[historyPointer]));
+                selectedElement = null;
+                redraw();
+            }
+        }
+
+        function showStatus(message, duration = 3000) {
+            console.log("Status:", message);
+        }
+
+        // --- Canvas Setup and Transformation ---
+
+        function resetView() {
+            translateX = 0;
+            translateY = 0;
+            scale = 1;
+            redraw();
+            updateZoomPercentage();
+        }
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const dpr = window.devicePixelRatio || 1;
+
+            canvas.width = container.clientWidth * dpr;
+            canvas.height = container.clientHeight * dpr;
+
+            canvas.style.width = container.clientWidth + 'px';
+            canvas.style.height = container.clientHeight + 'px';
+
+            redraw();
+        }
+
+        function screenToWorld(screenX, screenY) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+
+            // Map client coordinates to physical canvas pixels, then apply inverse transformations.
+            const canvasX = (screenX - rect.left) * dpr;
+            const canvasY = (screenY - rect.top) * dpr;
+
+            const worldX = (canvasX / (scale * dpr)) - translateX;
+            const worldY = (canvasY / (scale * dpr)) - translateY;
+
+            return [worldX, worldY];
+        }
+
+        function worldToScreen(worldX, worldY) {
+            // Calculates the CSS/client position, not scaled by DPR
+            const screenX = (worldX + translateX) * scale;
+            const screenY = (worldY + translateY) * scale;
+            return [screenX, screenY];
+        }
+
+        function getCoords(event) {
+            let clientX, clientY;
+            if (event.touches && event.touches.length > 0) {
+                clientX = event.touches[0].clientX;
+                clientY = event.touches[0].clientY;
+            } else {
+                clientX = event.clientX;
+                clientY = event.clientY;
+            }
+            return screenToWorld(clientX, clientY);
+        }
+
+        function updateZoomPercentage() {
+            document.getElementById('zoomPercentage').textContent = `${Math.round(scale * 100)}%`;
+        }
+
+        // --- Sketchy Rendering Logic (Simplified Excalidraw-like) ---
+
+        function generateSketchyPoints(points, options) {
+            const sketchyPoints = [];
+            const elementRoughness = options.roughness !== undefined ? options.roughness : roughness;
+            const segmentLength = options.segmentLength || 10;
+
+            // Check for single point, cannot generate segments
+            if (points.length < 2) return points;
+
+            for (let i = 0; i < points.length - 1; i++) {
+                const p1 = points[i];
+                const p2 = points[i+1];
+                const dx = p2[0] - p1[0];
+                const dy = p2[1] - p1[1];
+                const distance = Math.hypot(dx, dy);
+
+                const numSegments = Math.max(1, Math.floor(distance / segmentLength));
+
+                sketchyPoints.push(p1);
+
+                for (let j = 1; j < numSegments; j++) {
+                    const t = j / numSegments;
+                    const x = p1[0] + dx * t;
+                    const y = p1[1] + dy * t;
+
+                    const jitterX = (Math.random() - 0.5) * elementRoughness * (segmentLength / scale);
+                    const jitterY = (Math.random() - 0.5) * elementRoughness * (segmentLength / scale);
+
+                    sketchyPoints.push([x + jitterX, y + jitterY]);
+                }
+            }
+            sketchyPoints.push(points[points.length - 1]);
+            return sketchyPoints;
+        }
+
+        function drawSketchyPath(ctx, pathPoints, options) {
+            if (pathPoints.length < 2) return;
+
+            ctx.beginPath();
+            ctx.moveTo(pathPoints[0][0], pathPoints[0][1]);
+            for (let i = 1; i < pathPoints.length; i++) {
+                ctx.lineTo(pathPoints[i][0], pathPoints[i][1]);
+            }
+            ctx.stroke();
+        }
+
+        function drawArrowhead(ctx, x, y, angle, size) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-size * 1.5, size * 0.75);
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-size * 1.5, -size * 0.75);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function redraw() {
+            const dpr = window.devicePixelRatio || 1;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            canvas.style.backgroundColor = backgroundColor;
+
+            // Apply World Transformation
+            ctx.translate(translateX * scale * dpr, translateY * scale * dpr);
+            ctx.scale(scale, scale);
+
+            elements.forEach(element => {
+                ctx.strokeStyle = element.strokeColor;
+                ctx.lineWidth = element.strokeWidth / scale;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.globalAlpha = element.opacity;
+
+                const elementRoughness = element.roughness !== undefined ? element.roughness : roughness;
+
+                if (element.type === 'freehand' && element.points.length > 1) {
+                    const sketchyPath = generateSketchyPoints(element.points, { roughness: elementRoughness, segmentLength: 5 });
+                    drawSketchyPath(ctx, sketchyPath, {});
+                }
+                else if (element.type === 'rectangle' || element.type === 'diamond') {
+                    const { x, y, width, height } = element;
+                    const path = [];
+
+                    if (element.type === 'rectangle') {
+                        path.push([x, y], [x + width, y], [x + width, y + height], [x, y + height], [x, y]);
+                    } else { // diamond
+                        const midX = x + width / 2;
+                        const midY = y + height / 2;
+                        path.push([midX, y], [x + width, midY], [midX, y + height], [x, midY], [midX, y]);
+                    }
+                    const sketchyPath = generateSketchyPoints(path, { roughness: elementRoughness, segmentLength: 10 });
+                    drawSketchyPath(ctx, sketchyPath, {});
+                }
+                else if (element.type === 'circle' && element.radius !== 0) {
+                    const { x, y, radius } = element;
+                    // Draw a basic circle outline
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                else if ((element.type === 'line' || element.type === 'arrow') && element.points.length >= 2) {
+                    // Check if there are points to draw a line/arrow
+                    if (element.points.length === 2) {
+                        const p1 = element.points[0];
+                        const p2 = element.points[1];
+                        const sketchyPath = generateSketchyPoints([p1, p2], { roughness: elementRoughness, segmentLength: 5 });
+                        drawSketchyPath(ctx, sketchyPath, {});
+
+                        if (element.type === 'arrow') {
+                            const angle = Math.atan2(p2[1] - p1[1], p2[0] - p1[0]);
+                            const arrowSize = Math.max(8, element.strokeWidth * 2);
+                            drawArrowhead(ctx, p2[0], p2[1], angle, arrowSize / scale);
+                        }
+                    }
+                }
+                else if (element.type === 'text' && element.text) {
+                    ctx.fillStyle = element.strokeColor;
+                    const fontSize = element.fontSize;
+                    ctx.font = `${fontSize / scale}px ${FONT_FAMILY}`;
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+
+                    const lines = element.text.split('\n');
+                    const lineHeight = element.lineHeight;
+
+                    lines.forEach((line, index) => {
+                        ctx.fillText(line, element.x, element.y + index * lineHeight);
+                    });
+                }
+            });
+            ctx.globalAlpha = 1.0; // Reset global alpha
+
+            // Draw selection handles if an element is selected
+            if (selectedElement && selectedElement.id !== (currentElement ? currentElement.id : null)) {
+                ctx.strokeStyle = '#00aaff';
+                ctx.lineWidth = 2 / scale;
+                ctx.setLineDash([5 / scale, 5 / scale]);
+
+                const { x, y, width, height } = getElementBounds(selectedElement);
+                // Draw selection box around the bounds
+                ctx.strokeRect(x - 5 / scale, y - 5 / scale, width + 10 / scale, height + 10 / scale);
+
+                ctx.setLineDash([]);
+                ctx.lineWidth = 1;
+            }
+        }
+
+
+        // --- Element Eraser & Selection Logic (Hit Testing) ---
+
+        function getElementBounds(element) {
+            if (element.type === 'text') {
+                return { x: element.x, y: element.y, width: element.width, height: element.height };
+            }
+            if (element.type === 'rectangle' || element.type === 'diamond') {
+                return { x: element.x, y: element.y, width: element.width, height: element.height };
+            }
+            if (element.type === 'circle') {
+                // Circle center is (x,y), radius is radius
+                return { x: element.x - element.radius, y: element.y - element.radius, width: element.radius * 2, height: element.radius * 2 };
+            }
+
+            // For line/freehand/arrow, calculate bounding box dynamically
+            if (element.points && element.points.length > 0) {
+                const xs = element.points.map(p => p[0]);
+                const ys = element.points.map(p => p[1]);
+                const minX = Math.min(...xs);
+                const maxX = Math.max(...xs);
+                const minY = Math.min(...ys);
+                const maxY = Math.max(...ys);
+                return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+            }
+            return { x: 0, y: 0, width: 0, height: 0 };
+        }
+
+        function hitTest(wx, wy, element, toleranceFactor = 1) {
+            const tolerance = (10 / scale) * toleranceFactor;
+
+            if (element.type === 'rectangle' || element.type === 'diamond' || element.type === 'text') {
+                const { x, y, width, height } = getElementBounds(element);
+                return width !== 0 && height !== 0 &&
+                    wx >= x - tolerance && wx <= x + width + tolerance &&
+                    wy >= y - tolerance && wy <= y + height + tolerance;
+            }
+
+            if (element.type === 'circle') {
+                // Precise hit test for circle
+                const distance = Math.hypot(wx - element.x, wy - element.y);
+                // Hit if cursor is near the circumference (within tolerance of the radius)
+                return distance <= element.radius + tolerance && distance >= element.radius - (element.strokeWidth / 2) - tolerance;
+            }
+
+            // For line/freehand/arrow, use line segment checks
+            if (element.points && element.points.length > 1) {
+                for (let i = 0; i < element.points.length - 1; i++) {
+                    const [A, B] = element.points[i];
+                    const [C, D] = element.points[i+1];
+                    const P = wx;
+                    const Q = wy;
+
+                    const xMin = Math.min(A, C);
+                    const xMax = Math.max(A, C);
+                    const yMin = Math.min(B, D);
+                    const yMax = Math.max(B, D);
+                    if (P < xMin - tolerance || P > xMax + tolerance || Q < yMin - tolerance || Q > yMax + tolerance) {
+                        continue;
+                    }
+
+                    const L2 = (C - A) * (C - A) + (D - B) * (D - B);
+                    if (L2 === 0) {
+                        if (Math.hypot(P - A, Q - B) <= tolerance) return true;
+                    } else {
+                        const t = ((P - A) * (C - A) + (Q - B) * (D - B)) / L2;
+                        const tClamped = Math.max(0, Math.min(1, t));
+                        const closestX = A + tClamped * (C - A);
+                        const closestY = B + tClamped * (D - B);
+                        const distance = Math.hypot(P - closestX, Q - closestY);
+                        // Increase tolerance slightly based on stroke width
+                        if (distance <= tolerance + element.strokeWidth / scale) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function findHitElement(wx, wy) {
+            for (let i = elements.length - 1; i >= 0; i--) {
+                if (hitTest(wx, wy, elements[i])) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        function applyPropertyToSelectedElement(prop, value) {
+            if (selectedElement) {
+                selectedElement[prop] = value;
+                saveHistory();
+                redraw();
+            }
+        }
+
+
+        // --- Text Tool Logic (Unchanged as they were the latest fix) ---
+
+        function updateTextareaSize() {
+            if (!textElementData) return;
+            textElementData.text = tempTextarea.value;
+            tempTextarea.style.height = 'auto';
+            tempTextarea.style.width = 'auto';
+            const measurer = document.createElement('div');
+            measurer.style.position = 'absolute';
+            measurer.style.visibility = 'hidden';
+            measurer.style.whiteSpace = 'pre-wrap';
+            measurer.style.font = tempTextarea.style.font;
+            measurer.style.lineHeight = tempTextarea.style.lineHeight;
+            measurer.style.padding = '4px';
+            measurer.style.border = '1px solid transparent';
+            measurer.textContent = textElementData.text || 'M';
+            document.body.appendChild(measurer);
+            const requiredWidthPx = measurer.offsetWidth + 2;
+            const requiredHeightPx = measurer.offsetHeight + 2;
+            document.body.removeChild(measurer);
+            tempTextarea.style.width = `${requiredWidthPx}px`;
+            tempTextarea.style.height = `${requiredHeightPx}px`;
+            textElementData.width = requiredWidthPx / scale;
+            textElementData.height = requiredHeightPx / scale;
+        }
+
+        function finishTextEdit() {
+            if (!textElementData) return;
+            tempTextarea.removeEventListener('input', updateTextareaSize);
+            tempTextarea.removeEventListener('blur', finishTextEdit);
+            updateTextareaSize();
+            tempTextarea.classList.add('hidden');
+            tempTextarea.style.transform = 'scale(1)';
+            tempTextarea.blur();
+            if (textElementData.text.trim() !== '') {
+                const existingIndex = elements.findIndex(el => el.id === textElementData.id);
+                if (existingIndex === -1) {
+                    elements.push(textElementData);
+                } else {
+                    elements[existingIndex] = { ...textElementData };
+                }
+                selectedElement = elements[elements.findIndex(el => el.id === textElementData.id)];
+                saveHistory();
+            } else {
+                elements = elements.filter(el => el.id !== textElementData.id);
+                selectedElement = null;
+            }
+            textElementData = null;
+            redraw();
+        }
+
+        function startTextEdit(worldX, worldY, existingElement = null) {
+            finishTextEdit();
+            const baseFontSize = DEFAULT_TEXT_SIZE * (strokeWidth / 5);
+            const lineHeightRatio = 1.5;
+            const lineHeightPx = baseFontSize * lineHeightRatio;
+            tempTextarea.value = existingElement ? existingElement.text : '';
+            tempTextarea.style.font = `${baseFontSize}px ${FONT_FAMILY}`;
+            tempTextarea.style.lineHeight = `${lineHeightRatio}`;
+            tempTextarea.style.color = strokeColor;
+            const [screenX, screenY] = worldToScreen(worldX, worldY);
+            tempTextarea.style.left = `${screenX}px`;
+            tempTextarea.style.top = `${screenY}px`;
+            tempTextarea.style.transform = `scale(${scale})`;
+            tempTextarea.classList.remove('hidden');
+            setTimeout(() => {
+                tempTextarea.focus();
+                tempTextarea.addEventListener('input', updateTextareaSize);
+                tempTextarea.addEventListener('blur', finishTextEdit);
+            }, 0);
+            textElementData = existingElement ? { ...existingElement } : {
+                id: crypto.randomUUID(),
+                type: 'text',
+                x: worldX,
+                y: worldY,
+                text: '',
+                strokeColor: strokeColor,
+                strokeWidth: strokeWidth,
+                opacity: opacity,
+                roughness: roughness,
+                fontSize: baseFontSize,
+                lineHeight: lineHeightPx,
+                width: 0,
+                height: 0,
+            };
+            updateTextareaSize();
+        }
+
+
+        // --- Event Handlers (Drawing, Panning, Zooming) ---
+
+        function startInteraction(event) {
+            const isTouch = event.touches && event.touches.length > 0;
+            const isMiddleClick = event.button === 1;
+            const isTwoFingerPan = isTouch && event.touches.length === 2;
+
+            if (textElementData) {
+                const rect = tempTextarea.getBoundingClientRect();
+                const clientX = event.clientX || (event.touches ? event.touches[0].clientX : 0);
+                const clientY = event.clientY || (event.touches ? event.touches[0].clientY : 0);
+
+                if (clientX < rect.left || clientX > rect.right || clientY > rect.bottom || clientY < rect.top) {
+                finishTextEdit();
+                } else {
+                return;
+                }
+            }
+
+            if (currentTool === 'hand' || isTwoFingerPan || isMiddleClick) {
+                isPanning = true;
+                // CORRECTED LINES BELOW: Ensures event.clientX and event.clientY are used correctly
+                const clientX = isTwoFingerPan ? event.touches[0].clientX : event.clientX;
+                const clientY = isTwoFingerPan ? event.touches[0].clientY : event.clientY;
+                lastPanX = clientX;
+                lastPanY = clientY;
+                canvas.style.cursor = 'grabbing';
+                selectedElement = null;
+                redraw();
+                return;
+            }
+
+            if (event.button !== 0 && !isTouch) return;
+            if (isTouch && event.touches.length !== 1) return;
+
+            const [worldX, worldY] = getCoords(event);
+            startPoint = [worldX, worldY];
+
+            if (currentTool === 'eraser') {
+                const index = findHitElement(worldX, worldY);
+                if (index !== -1) {
+                    elements.splice(index, 1);
+                    saveHistory();
+                    selectedElement = null;
+                    redraw();
+                }
+                return;
+            }
+
+            if (currentTool === 'text') {
+                startTextEdit(worldX, worldY);
+                return;
+            }
+
+            if (currentTool === 'selection') {
+                const index = findHitElement(worldX, worldY);
+
+                if (event.detail === 2 && index !== -1 && elements[index].type === 'text') {
+                    const el = elements[index];
+                    startTextEdit(el.x, el.y, el);
+                    return;
+                }
+
+                if (index !== -1) {
+                    selectedElement = elements[index];
+                    isDrawing = true;
+                    currentTool = 'selection';
+
+                    const bounds = getElementBounds(selectedElement);
+                    dragOffset.x = worldX - bounds.x;
+                    dragOffset.y = worldY - bounds.y;
+
+                    canvas.style.cursor = 'move';
+                } else {
+                    selectedElement = null;
+                }
+                redraw();
+                return;
+            }
+
+            // --- Starting a New Element Drawing ---
+            selectedElement = null;
+            isDrawing = true;
+
+            currentElement = {
+                id: crypto.randomUUID(),
+                type: currentTool,
+                strokeColor: strokeColor,
+                strokeWidth: strokeWidth,
+                opacity: opacity,
+                roughness: roughness,
+            };
+
+            if (currentTool === 'freehand' || currentTool === 'line' || currentTool === 'arrow') {
+                currentElement.points = [[worldX, worldY]];
+            } else if (currentTool === 'rectangle' || currentTool === 'diamond' || currentTool === 'circle') {
+                currentElement.x = worldX;
+                currentElement.y = worldY;
+                currentElement.width = 0;
+                currentElement.height = 0;
+                if (currentTool === 'circle') currentElement.radius = 0;
+            }
+
+            elements.push(currentElement);
+            redraw();
+        }
+
+        function interactionMove(event) {
+            if (event.touches && event.touches.length > 1) {
+                return;
+            }
+
+            const [currentX, currentY] = getCoords(event);
+            const [startX, startY] = startPoint;
+
+            if (isPanning) {
+                event.preventDefault();
+                const clientX = event.touches && event.touches.length > 0 ? event.touches[0].clientX : event.clientX;
+                const clientY = event.touches && event.touches.length > 0 ? event.touches[0].clientY : event.clientY;
+
+                const dx = clientX - lastPanX;
+                const dy = clientY - lastPanY;
+
+                translateX += dx / scale;
+                translateY += dy / scale;
+
+                lastPanX = clientX;
+                lastPanY = clientY;
+
+                redraw();
+
+                if (textElementData) {
+                    const [screenX, screenY] = worldToScreen(textElementData.x, textElementData.y);
+                    tempTextarea.style.left = `${screenX}px`;
+                    tempTextarea.style.top = `${screenY}px`;
+                    tempTextarea.style.transform = `scale(${scale})`;
+                    updateTextareaSize();
+                }
+                return;
+            }
+
+            if (!isDrawing) return;
+            event.preventDefault();
+
+            if (currentTool === 'selection' && selectedElement) {
+                const dx = currentX - startX;
+                const dy = currentY - startY;
+
+                const newBoundsX = currentX - dragOffset.x;
+                const newBoundsY = currentY - dragOffset.y;
+
+                if (selectedElement.type === 'text' || selectedElement.type === 'rectangle' || selectedElement.type === 'diamond') {
+                    selectedElement.x = newBoundsX;
+                    selectedElement.y = newBoundsY;
+                } else if (selectedElement.type === 'circle') {
+                    const radius = selectedElement.radius;
+                    // Circle bounds include radius in the offset calculation from the bounding box origin
+                    selectedElement.x = newBoundsX + radius;
+                    selectedElement.y = newBoundsY + radius;
+                } else if (selectedElement.type === 'freehand' || selectedElement.type === 'line' || selectedElement.type === 'arrow') {
+                    selectedElement.points = selectedElement.points.map(([px, py]) => [px + dx, py + dy]);
+                    startPoint = [currentX, currentY]; // Reset start point for incremental movement
+                }
+            } else if (currentElement) {
+                // Drawing new element logic
+                if (currentTool === 'freehand') {
+                    currentElement.points.push([currentX, currentY]);
+                } else if (currentTool === 'rectangle' || currentTool === 'diamond') {
+                    currentElement.x = Math.min(startX, currentX);
+                    currentElement.y = Math.min(startY, currentY);
+                    currentElement.width = Math.abs(currentX - startX);
+                    currentElement.height = Math.abs(currentY - startY);
+                } else if (currentTool === 'circle') {
+                    currentElement.x = startX;
+                    currentElement.y = startY;
+                    currentElement.radius = Math.hypot(currentX - startX, currentY - startY);
+                }
+                else if (currentTool === 'line' || currentTool === 'arrow') {
+                    // CRITICAL FIX: Ensure the line has a second point and update it during move
+                    if (currentElement.points.length === 1) {
+                        currentElement.points.push([currentX, currentY]);
+                    } else {
+                        currentElement.points[1] = [currentX, currentY];
+                    }
+                }
+            }
+
+            redraw();
+        }
+
+        function stopInteraction(event) {
+            if (isDrawing && currentElement) {
+                // Use a small world distance threshold (e.g., 5px at 100% zoom)
+                const minMovementThreshold = 5 / scale;
+                
+                let shouldRemove = false;
+                
+                if (currentElement.type === 'rectangle' || currentElement.type === 'diamond') {
+                    shouldRemove = (currentElement.width < minMovementThreshold && currentElement.height < minMovementThreshold);
+                } else if (currentElement.type === 'circle') {
+                    shouldRemove = (currentElement.radius < minMovementThreshold);
+                } 
+                // CRITICAL FIX FOR LINE/ARROW
+                else if (currentElement.type === 'line' || currentElement.type === 'arrow') {
+                    if (currentElement.points.length < 2) {
+                        // Was just a click, no drag registered
+                        shouldRemove = true;
+                    } else {
+                        // Check if the start point and end point are too close
+                        const p1 = currentElement.points[0];
+                        const p2 = currentElement.points[currentElement.points.length - 1];
+                        // Calculate actual distance between start and end point
+                        const distance = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+                        shouldRemove = distance < minMovementThreshold;
+                    }
+                } else if (currentElement.type === 'freehand' && currentElement.points.length < 2) {
+                    shouldRemove = true;
+                }
+
+                if (shouldRemove) {
+                    elements = elements.filter(el => el.id !== currentElement.id);
+                } else {
+                    if (typeof saveHistory === 'function') saveHistory(); // Save valid elements
+                }
+            }
+            
+            // Clear the active states
+            isDrawing = false;
+            isPanning = false;
+            
+            // Clear selection state after movement is complete
+            if (selectedElement) {
+                // We only save history if a move actually occurred
+                const moved = selectedElement.originalX !== elements.find(el => el.id === selectedElement.id)?.x || 
+                            selectedElement.originalY !== elements.find(el => el.id === selectedElement.id)?.y;
+                if (moved && typeof saveHistory === 'function') {
+                    saveHistory();
+                }
+            }
+            selectedElement = null; // Clear selection after mouse up
+
+            if (typeof getCursorForTool === 'function') canvas.style.cursor = getCursorForTool(currentTool); // Reset cursor based on active tool
+            currentElement = null; 
+            redraw(); 
+        }
+
+        function handleZoom(event, zoomDirection = 0) {
+            event.preventDefault();
+
+            let delta = 0;
+            if (zoomDirection !== 0) {
+                delta = zoomDirection * 100;
+            } else {
+                delta = event.deltaY || event.detail || 0;
+            }
+
+            const direction = delta < 0 ? 1 : -1;
+            const factor = Math.pow(ZOOM_FACTOR, Math.abs(delta) * 0.01);
+
+            const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale * (direction === 1 ? factor : 1 / factor)));
+
+            if (newScale === scale) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const clientX = event.clientX !== undefined ? (event.clientX - rect.left) : (rect.width / 2);
+            const clientY = event.clientY !== undefined ? (event.clientY - rect.top) : (rect.height / 2);
+
+            const oldScale = scale;
+            scale = newScale;
+
+            const dx = (clientX / oldScale) - (clientX / scale);
+            const dy = (clientY / oldScale) - (clientY / scale);
+
+            translateX -= dx;
+            translateY -= dy;
+
+            redraw();
+            updateZoomPercentage();
+
+            if (textElementData) {
+                const [screenX, screenY] = worldToScreen(textElementData.x, textElementData.y);
+                tempTextarea.style.left = `${screenX}px`;
+                tempTextarea.style.top = `${screenY}px`;
+                tempTextarea.style.transform = `scale(${scale})`;
+                updateTextareaSize();
+            }
+        }
+
+        // --- JSON Export Function (Replace existing exportCanvasAsJson) ---
+
+        function exportCanvasAsJson() {
+            // Note: finishTextEdit() must be called before exporting to save any open text box content.
+            // finishTextEdit(); 
+
+            if (elements.length === 0) {
+                // showStatus("The canvas is empty. Draw something before exporting!");
+                console.log("Status: The canvas is empty. Draw something before exporting!");
+                return;
+            }
+
+            // Capture all state data required for a complete reload
+            const dataToSave = {
+                excalidrawCloneVersion: '1.0',
+                elements: elements,
+                view: { translateX, translateY, scale, backgroundColor },
+                config: { strokeColor, strokeWidth, opacity, roughness }
+            };
+
+            const dataStr = JSON.stringify(dataToSave, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+
+            // Use a temporary link element to trigger the download
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `excalidraw-clone-export-${Date.now()}.json`;
+
+            // Trigger download
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // showStatus("Drawing successfully exported!");
+            console.log("Status: Drawing successfully exported!");
+        }
+
+        // --- JSON Import Function (Replace existing loadCanvasFromJson) ---
+
+        function loadCanvasFromJson(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                const jsonContent = e.target.result;
+                try {
+                    const loadedData = JSON.parse(jsonContent);
+
+                    if (!loadedData.elements || !Array.isArray(loadedData.elements)) {
+                        // showStatus("Error: The file content is not a valid Sketchy Draw JSON format.");
+                        console.error("Error: The file content is not a valid Sketchy Draw JSON format.");
+                        event.target.value = ''; // Clear file input
+                        return;
+                    }
+
+                    // Load Elements and View State
+                    elements = loadedData.elements;
+
+                    if (loadedData.view) {
+                        translateX = loadedData.view.translateX;
+                        translateY = loadedData.view.translateY;
+                        scale = loadedData.view.scale;
+                        backgroundColor = loadedData.view.backgroundColor || '#262626';
+                    }
+
+                    // Load Config State
+                    if (loadedData.config) {
+                        strokeColor = loadedData.config.strokeColor || strokeColor;
+                        strokeWidth = loadedData.config.strokeWidth || strokeWidth;
+                        opacity = loadedData.config.opacity || opacity;
+                        roughness = loadedData.config.roughness || roughness;
+                    } else {
+                        // Fallback for older file format
+                        strokeColor = loadedData.strokeColor || strokeColor;
+                        strokeWidth = loadedData.strokeWidth || strokeWidth;
+                        opacity = loadedData.opacity || opacity;
+                        roughness = loadedData.roughness || roughness;
+                    }
+
+                    // --- Update UI Sliders/Pickers based on loaded data ---
+                    const updateUI = () => {
+                        const elements = [
+                            { id: 'strokeColorPicker', value: strokeColor },
+                            { id: 'bgColorPicker', value: backgroundColor },
+                            { id: 'strokeWidthSlider', value: strokeWidth, textId: 'currentStrokeWidth' },
+                            { id: 'opacitySlider', value: opacity * 100, textId: 'currentOpacity', transform: v => Math.round(v) + '%' },
+                            { id: 'roughnessSlider', value: roughness, textId: 'currentRoughness' }
+                        ];
+                        elements.forEach(item => {
+                            const el = document.getElementById(item.id);
+                            if (el) { el.value = item.value; }
+                            if (item.textId) {
+                                const textEl = document.getElementById(item.textId);
+                                if (textEl) {
+                                    textEl.textContent = item.transform ? item.transform(item.value) : item.value;
+                                }
+                            }
+                        });
+                    };
+
+                    updateUI();
+                    // --------------------------------------------------------
+
+                    // Reset history and save the new loaded state
+                    history = [];
+                    historyPointer = -1;
+                    // *Dependency Check:* These functions MUST be defined in your main script
+                    if (typeof saveHistory === 'function') saveHistory();
+                    if (typeof redraw === 'function') redraw();
+                    if (typeof updateZoomPercentage === 'function') updateZoomPercentage();
+                    
+                    console.log(`Status: Successfully imported ${elements.length} elements.`);
+
+                } catch (error) {
+                    console.error(`Status: Failed to parse JSON file: ${error.message}`);
+                }
+                event.target.value = ''; // Clear file input
+            };
+
+            reader.readAsText(file);
+        }
+
+
+
+        // --- UI Control Helpers ---
+
+        function getCursorForTool(tool) {
+            switch (tool) {
+                case 'hand': return 'grab';
+                case 'selection': return 'default';
+                case 'eraser': return 'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'24\' viewport=\'0 0 24 24\' version=\'1.1\'><path fill=\'black\' d=\'M19 7l-.865 10.375A2 2 0 0116.138 21H7.862a2 2 0 01-1.997-1.625L5 7m5 4v6m4-6v6M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M6 7h12\' transform=\'translate(0,0)\'/><path fill=\'white\' d=\'M19 7l-.865 10.375A2 2 0 0116.138 21H7.862a2 2 0 01-1.997-1.625L5 7m5 4v6m4-6v6M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2M6 7h12\' transform=\'translate(0,0)\'/></svg>") 12 12, auto';
+                case 'text': return 'text';
+                default: return 'crosshair';
+            }
+        }
+
+        function setActiveToolButton(tool) {
+            document.querySelectorAll('[data-tool]').forEach(btn => btn.classList.remove('tool-active'));
+            const activeButton = document.querySelector(`[data-tool="${tool}"]`);
+            if (activeButton) {
+                activeButton.classList.add('tool-active');
+            }
+            canvas.style.cursor = getCursorForTool(tool);
+            selectedElement = null;
+            redraw();
+        }
+
+        // --- Initialization ---
+
+            function init() {
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        if (typeof resetView === 'function') resetView(); // Ensure resetView is called
+        setActiveToolButton(currentTool);
+
+        // --- Interaction Listeners (Canvas and Global) ---
+        canvas.addEventListener('mousedown', startInteraction);
+        canvas.addEventListener('mousemove', interactionMove);
+        document.addEventListener('mouseup', stopInteraction);
+
+        canvas.addEventListener('touchstart', (e) => { startInteraction(e); e.preventDefault(); }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { interactionMove(e); e.preventDefault(); }, { passive: false });
+        document.addEventListener('touchend', stopInteraction);
+
+        canvas.addEventListener('dblclick', (e) => {
+            const [worldX, worldY] = getCoords(e);
+            const index = findHitElement(worldX, worldY);
+            if (index !== -1 && elements[index].type === 'text') {
+                const el = elements[index];
+                if (typeof startTextEdit === 'function') startTextEdit(el.x, el.y, el);
+            }
+        });
+
+        canvas.addEventListener('wheel', handleZoom, { passive: false });
+
+        // --- Keyboard Shortcuts ---
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                if (typeof undo === 'function') undo();
+            }
+            if ((e.key === 'y' || e.key === 'Y') && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                if (typeof redo === 'function') redo();
+            }
+            // Tool selection shortcuts
+            let newTool = null;
+            switch (e.key.toLowerCase()) {
+                case 'v': newTool = 'selection'; break;
+                case 'r': newTool = 'rectangle'; break;
+                case 'o': newTool = 'circle'; break;
+                case 'd': newTool = 'diamond'; break;
+                case 'a': newTool = 'arrow'; break;
+                case 'l': newTool = 'line'; break;
+                case 'p': newTool = 'freehand'; break;
+                case 't': newTool = 'text'; break;
+                case 'e': newTool = 'eraser'; break;
+                case 'h': newTool = 'hand'; break;
+            }
+            if (newTool) {
+                currentTool = newTool;
+                if (typeof setActiveToolButton === 'function') setActiveToolButton(currentTool);
+            }
+        });
+
+
+        // --- UI Control Listeners (FIXED AND IMPLEMENTED) ---
+        // Tool Selection Buttons
+        document.querySelectorAll('[data-tool]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const newTool = e.currentTarget.dataset.tool;
+                if (currentTool === 'text' && newTool !== 'text' && typeof finishTextEdit === 'function') {
+                    finishTextEdit();
+                }
+                currentTool = newTool;
+                if (typeof setActiveToolButton === 'function') setActiveToolButton(currentTool);
+            });
+        });
+
+        // Zoom Controls
+        document.getElementById('zoomInButton').addEventListener('click', (e) => handleZoom(e, 1));
+        document.getElementById('zoomOutButton').addEventListener('click', (e) => handleZoom(e, -1));
+        document.getElementById('resetZoomButton').addEventListener('click', resetView);
+
+        // Color Pickers and Sliders
+        document.getElementById('strokeColorPicker').addEventListener('input', (e) => {
+            strokeColor = e.target.value;
+            if (typeof applyPropertyToSelectedElement === 'function') applyPropertyToSelectedElement('strokeColor', strokeColor);
+            redraw();
+        });
+        document.getElementById('presetColors').addEventListener('click', (e) => {
+            if (e.target.dataset.color) {
+                strokeColor = e.target.dataset.color;
+                document.getElementById('strokeColorPicker').value = strokeColor;
+                if (typeof applyPropertyToSelectedElement === 'function') applyPropertyToSelectedElement('strokeColor', strokeColor);
+                redraw();
+            }
+        });
+
+        document.getElementById('bgColorPicker').addEventListener('input', (e) => {
+            backgroundColor = e.target.value;
+            redraw();
+        });
+        document.getElementById('presetBgColors').addEventListener('click', (e) => {
+            if (e.target.dataset.color) {
+                backgroundColor = e.target.dataset.color;
+                document.getElementById('bgColorPicker').value = backgroundColor;
+                redraw();
+            }
+        });
+
+        document.getElementById('strokeWidthSlider').addEventListener('input', (e) => {
+            strokeWidth = parseInt(e.target.value);
+            document.getElementById('currentStrokeWidth').textContent = strokeWidth;
+            if (typeof applyPropertyToSelectedElement === 'function') applyPropertyToSelectedElement('strokeWidth', strokeWidth);
+        });
+
+        // NOTE: assuming 'roughnessSlider' and 'currentRoughness' exist in your HTML
+        const roughnessSlider = document.getElementById('roughnessSlider');
+        if (roughnessSlider) {
+            roughnessSlider.addEventListener('input', (e) => {
+                roughness = parseFloat(e.target.value);
+                document.getElementById('currentRoughness').textContent = roughness;
+                if (typeof applyPropertyToSelectedElement === 'function') applyPropertyToSelectedElement('roughness', roughness);
+            });
+        }
+
+
+        document.getElementById('opacitySlider').addEventListener('input', (e) => {
+            opacity = parseInt(e.target.value) / 100;
+            document.getElementById('currentOpacity').textContent = Math.round(opacity * 100) + '%';
+            if (typeof applyPropertyToSelectedElement === 'function') applyPropertyToSelectedElement('opacity', opacity);
+        });
+
+
+        // Undo/Redo/File I/O
+        document.getElementById('undoButton').addEventListener('click', undo);
+        document.getElementById('redoButton').addEventListener('click', redo);
+        document.getElementById('exportButton').addEventListener('click', exportCanvasAsJson);
+        document.getElementById('importButton').addEventListener('click', () => { document.getElementById('importFile').click(); });
+        document.getElementById('importFile').addEventListener('change', loadCanvasFromJson);
+
+        if (typeof saveHistory === 'function') saveHistory();
+        console.log("Excalidraw Clone ready. UI listeners attached.");
+    }
+
+
+        window.onload = init;
+
+        // --- End of New, Final JavaScript Code ---
+
+
+    </script>
+</body>
+</html>
