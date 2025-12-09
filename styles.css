@@ -1,0 +1,344 @@
+/* --- Variables & Base Reset --- */
+:root {
+    --color-primary: #1A237E; /* Deep Indigo/Navy */
+    --color-accent: #FFB300; /* Amber Gold */
+    --color-background: #FAFAFA;
+    --color-card-bg: #ffffff;
+    --color-text: #343a40;
+    --color-subtle: #6c757d;
+    --color-border: #E0E0E0; /* Lighter border */
+    --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    padding-top: 60px;
+}
+
+a {
+    text-decoration: none;
+    color: var(--color-primary);
+    transition: color 0.3s;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.divider {
+    border-top: 1px solid var(--color-border);
+    margin: 40px 0;
+}
+
+
+/* --- Header (Navbar) --- */
+.header {
+    background-color: var(--color-card-bg);
+    box-shadow: var(--shadow-light);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+.header__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.logo {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.nav__link {
+    margin-left: 20px;
+    font-weight: 500;
+    color: var(--color-subtle);
+}
+
+.nav__link:hover {
+    color: var(--color-accent);
+}
+
+/* --- Buttons --- */
+.btn {
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.btn--primary {
+    color: black;
+    border: 2px solid var(--color-accent);
+}
+
+.btn--primary:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.link-text {
+    font-weight: 500;
+    margin-right: 20px;
+    color: var(--color-primary);
+}
+
+
+/* --- Section Structure --- */
+.section {
+    padding: 40px 0 20px 0;
+}
+
+.section__title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--color-primary);
+}
+
+.section__subtitle {
+    font-size: 1.1rem;
+    color: var(--color-subtle);
+    margin-bottom: 30px;
+}
+
+.grid {
+    display: grid;
+    gap: 30px;
+}
+
+.card {
+    background-color: var(--color-card-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 25px;
+    transition: box-shadow 0.3s;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+/* --- Project Card (New requirement: Single, large focus) --- */
+.project-card {
+    display: flex;
+    min-height: 450px;
+    border: none;
+    box-shadow: var(--shadow-light);
+}
+
+.project-card__image-box {
+    flex: 1;
+    background-color: var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--color-subtle);
+    /* For a professional look, ensure image fills this space later */
+}
+
+.project-card__content {
+    flex: 1.2;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.project-card__title {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--color-primary);
+}
+
+.project-card__description {
+    margin-bottom: 20px;
+}
+
+.project-card__tech {
+    margin-bottom: 25px;
+}
+
+.tech-badge {
+    display: inline-block;
+    background-color: #E8EAF6; /* Light Lavender */
+    color: var(--color-primary);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+/* --- Coding Profiles Section (Card Format) --- */
+.profile-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.profile-card {
+    text-align: center;
+}
+
+.profile-card__title {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    color: var(--color-primary);
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.metric-item {
+    padding: 15px 10px;
+    background-color: var(--color-background);
+    border-radius: 4px;
+    border-left: 3px solid var(--color-accent);
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.star {
+    color: var(--color-accent); /* Gold for stars */
+    font-size: 1.8rem;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    color: var(--color-subtle);
+}
+
+/* --- CSS for Tech Stack Alignment --- */
+
+.skills-grid {
+    /* FORCED ALIGNMENT: Ensures 4 columns of equal width */
+    grid-template-columns: repeat(4, 1fr); 
+}
+
+/* Fallback for smaller screens */
+@media (max-width: 1200px) {
+    .skills-grid {
+        /* Revert to auto-fit for responsiveness */
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    }
+}
+/* --- Adjusted Footer CSS (Ensuring all elements are visible) --- */
+
+.footer {
+    background-color: var(--color-primary);
+    color: #E0E0E0;
+    padding: 20px 0;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.footer__content p {
+    margin: 5px 0;
+}
+
+/* --- Certifications (Hyperlink Feature) --- */
+.certs__list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.certs__list li {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    padding-left: 30px;
+    position: relative;
+}
+
+.certs__list li::before {
+    content: '🏅'; /* Emoji bullet */
+    position: absolute;
+    left: 0;
+}
+
+.cert-link {
+    font-weight: 500;
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+
+/* --- Footer --- */
+.footer {
+    background-color: var(--color-primary);
+    color: #E0E0E0;
+    padding: 20px 0;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* --- CSS for Home Page Hero Enhancement --- */
+
+.section--hero-enhanced {
+    /* Increased top/bottom padding for a bold look */
+    padding: 120px 0 100px 0; 
+    text-align: left;
+}
+
+.hero__name {
+    font-size: 4.5rem; /* Slightly larger name */
+}
+
+.hero__role {
+    font-size: 1.8rem;
+    margin-bottom: 40px;
+}
+
+.hero__summary-box {
+    max-width: 900px;
+    padding: 20px;
+    border-left: 5px solid var(--color-accent); /* Gold line for emphasis */
+    background-color: var(--color-card-bg);
+    margin-bottom: 40px;
+    box-shadow: var(--shadow-light);
+}
+
+.hero__summary {
+    font-size: 1.15rem;
+    line-height: 1.8;
+}
+
+.hero__links-enhanced {
+    padding-top: 15px;
+    border-top: 1px solid var(--color-border);
+}
+
+.hero__links-enhanced p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    margin-bottom: 10px;
+}
