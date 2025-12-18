@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Me - Prateek Singh</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        
+        /* --- CONTACT SECTION --- */
+        .contact-container {
+            max-width: 600px;
+            margin: 60px auto;
+            background: rgb(255, 255, 255);
+            padding: 40px;
+            border-radius: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .contact-container h1 { color: #2c3e50; margin-bottom: 10px; }
+        .contact-container p { color: #666; margin-bottom: 45px; }
+
+        .contact-list { list-style: none; text-align: left; }
+        .contact-item {
+            margin-bottom: 20.25px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .contact-info strong { display: block; color: #2c3e50; font-size: 1.1rem; }
+        .contact-info span { color: #777; font-size: 0.9rem; }
+        
+        .contact-btn {
+            background-color: #f5f5f6;
+            color: rgb(0, 0, 0);
+            border: 2px solid var(--color-accent);
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .contact-btn.linkedin { background-color: #f5f5f6; }
+        .contact-btn.github { background-color: #f5f5f6; }
+        .contact-btn:hover { 
+            background-color: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container header__content">
+            <a href="index.html" class="logo">Prateek Singh</a>
+            <nav class="nav">
+                <a href="index.html" class="nav__link"><b>Home</b></a>
+                <a href="cpRecord.html" class="nav__link"><b>CP Record</b></a>
+                <a href="project.html" class="nav__link"><b>Project</b></a>
+                <a href="skills.html" class="nav__link"><b>Skills & Certs</b></a>
+                <a href="contact.html" class="nav__link"><b>Contact</b></a>
+            </nav>
+            <a href="Resume.pdf" class="btn btn--primary" download>Download Resume</a>
+        </div>
+    </header>
+
+    <div class="contact-container">
+        <h1>Get In Touch</h1>
+        <p>Feel free to reach out for collaborations or just to say hi!</p>
+
+        <ul class="contact-list">
+            
+            <li class="contact-item">
+                <div class="contact-info">
+                    <strong>Email</strong>
+                    <span>v.rajawatprateeksingh@gmail.com</span>
+                </div>
+                <a href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=v.rajawatprateeksingh@gmail.com&su=Inquiry%20from%20Portfolio&body=Hello%20there,%20I%20saw%20your%20site..." target="_blank" class="contact-btn">Send Mail</a>
+            </li>
+
+            <li class="contact-item">
+                <div class="contact-info">
+                    <strong>LinkedIn</strong>
+                    <span>Connect professionally</span>
+                </div>
+                <a href="https://www.linkedin.com/in/rajawatprateeksingh" target="_blank" class="contact-btn linkedin">Connect</a>
+            </li>
+
+            <li class="contact-item">
+                <div class="contact-info">
+                    <strong>GitHub</strong>
+                    <span>Check my Repos</span>
+                </div>
+                <a href="https://github.com/prateeksingh2" target="_blank" class="contact-btn github">Follow</a>
+            </li>
+        </ul>
+    </div>
+
+    <footer class="footer">
+        <div class="container footer__content">
+            <p>&copy; 2025 Prateek Singh. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
