@@ -70,7 +70,7 @@ a {
 .nav__link {
     margin-left: 20px;
     font-weight: 500;
-    color: var(--color-subtle);
+    color: rgba(1, 21, 1, 0.71);
 }
 
 .nav__link:hover {
@@ -264,7 +264,7 @@ a {
 
 /* --- Footer --- */
 .footer {
-    background-color: rgb(206, 213, 243);
+    background-color: rgb(200, 201, 246);
     color: #210202;
     padding: 13.5px 0;
     text-align: center;
@@ -280,11 +280,11 @@ a {
 }
 
 .hero__name {
-    font-size: 4.5rem; /* Slightly larger name */
+    font-size: 4.0rem; /* Slightly larger name */
 }
 
 .hero__role {
-    font-size: 1.8rem;
+    font-size: 1.4 rem;
     margin-bottom: 40px;
 }
 
@@ -293,7 +293,7 @@ a {
     padding: 20px;
     border-left: 5px solid var(--color-accent); /* Gold line for emphasis */
     background-color: var(--color-card-bg);
-    margin-bottom: 40px;
+    margin-bottom: 72px;
     box-shadow: var(--shadow-hover);
     box-shadow: 0px 2px 8px;
 }
