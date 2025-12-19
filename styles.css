@@ -97,6 +97,26 @@ a {
     border-color: var(--color-primary);
 }
 
+.nav-button{
+    background-color: blur;
+    color: rgba(0, 0, 0, 0.716);
+    padding: 21px 15px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border: 3px solid rgba(0, 0, 0, 0.07);
+}
+
+.nav-button:hover{
+    background-color: rgba(255, 68, 0, 0.155);
+    color: rgb(18, 94, 96);
+}
+
+.nav-logo{
+    color: var(--color-accent); /* Gold for stars */
+    font-size: 1.2rem;
+}
+
 .link-text {
     font-weight: 500;
     margin-right: 20px;
