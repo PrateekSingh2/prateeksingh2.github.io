@@ -33,7 +33,7 @@ a {
 
 .container {
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 0px auto;
     padding: 0 20px;
 }
 
@@ -292,16 +292,13 @@ a {
     font-size: 0.9rem;
 }
 
-/* --- CSS for Home Page Hero Enhancement --- */
-
 .section--hero-enhanced {
-    /* Increased top/bottom padding for a bold look */
-    padding: 120px 0 100px 0; 
+    padding: 87px 0 80px 0; 
     text-align: left;
 }
 
 .hero__name {
-    font-size: 4.0rem; /* Slightly larger name */
+    font-size: 4.0rem;
 }
 
 .hero__role {
@@ -312,7 +309,7 @@ a {
 .hero__summary-box {
     max-width: 700px;
     padding: 20px;
-    border-left: 5px solid rgb(3, 96, 3); /* Gold line for emphasis */
+    border-left: 5px solid rgb(3, 96, 3);
     background-color: var(--color-card-bg);
     margin-bottom: 72px;
     box-shadow: var(--shadow-hover);
@@ -343,25 +340,21 @@ a {
 }
 
 
-
-/* --- Hero Layout (Text Left, Image Right) --- */
 .hero-layout {
     display: flex;
-    align-items: center;    /* Vertically center the image with text */
+    align-items: center;
     justify-content: space-between;
-    gap: 40px;              /* Space between text and image */
+    gap: 40px;      
     margin-top: 20px;
 }
 
-/* Ensure text takes up available space but leaves room for image */
 .hero-text {
-    flex: 1; /* Grow to fill space */
-    max-width: 650px;
+    flex: 1;
+    max-width: 700px;
 }
 
-/* --- Profile Image Styles --- */
 .hero-image {
-    flex: 0 0 auto; /* Don't shrink the image */
+    flex: 0 0 auto;
 }
 
 .profile-pic {  
@@ -369,7 +362,6 @@ a {
     height: 280px;          
     border-radius: 50%;     
     object-fit: cover;     
-    /* border: 5px solid #3cec10e1;  */
     box-shadow: 0 0 25px rgba(189, 228, 31, 0.738);
     transition: transform 0.3s ease; 
     transform: scale(1.3);
