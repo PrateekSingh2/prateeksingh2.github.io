@@ -104,7 +104,7 @@ a {
     font-weight: 400;
     cursor: pointer;
     transition: background-color 0.3s;
-    border: 3px solid rgba(0, 0, 0, 0.07);
+    border: 0px solid rgba(0, 0, 0, 0.07);
 }
 
 .nav-button:hover{
@@ -153,12 +153,13 @@ a {
     border-radius: 8px;
     padding: 25px;
     transition: box-shadow 0.3s;
+    box-shadow: 0 0 15px rgba(0, 0, 255, 0.386);
 }
 
 .card:hover {
     box-shadow: var(--shadow-hover);
     border-color: rgba(224, 15, 15, 0.43);
-    box-shadow: 2px 2px 8px;
+    box-shadow: 2px 2px 4px green;
 }
 
 .project-card__content {
@@ -309,13 +310,18 @@ a {
 }
 
 .hero__summary-box {
-    max-width: 900px;
+    max-width: 700px;
     padding: 20px;
-    border-left: 5px solid var(--color-accent); /* Gold line for emphasis */
+    border-left: 5px solid rgb(3, 96, 3); /* Gold line for emphasis */
     background-color: var(--color-card-bg);
     margin-bottom: 72px;
     box-shadow: var(--shadow-hover);
-    box-shadow: 0px 2px 8px;
+    box-shadow: 2px 3px 15px blue;
+}
+.hero__summary-box:hover{
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(224, 15, 15, 0.43);
+    box-shadow: 2px 2px 8px blueviolet;
 }
 
 .hero__summary {
@@ -334,4 +340,62 @@ a {
     color: var(--color-primary);
     margin-bottom: 10px;
 
+}
+
+
+
+/* --- Hero Layout (Text Left, Image Right) --- */
+.hero-layout {
+    display: flex;
+    align-items: center;    /* Vertically center the image with text */
+    justify-content: space-between;
+    gap: 40px;              /* Space between text and image */
+    margin-top: 20px;
+}
+
+/* Ensure text takes up available space but leaves room for image */
+.hero-text {
+    flex: 1; /* Grow to fill space */
+    max-width: 650px;
+}
+
+/* --- Profile Image Styles --- */
+.hero-image {
+    flex: 0 0 auto; /* Don't shrink the image */
+}
+
+.profile-pic {  
+    width: 280px;           
+    height: 280px;          
+    border-radius: 50%;     
+    object-fit: cover;     
+    /* border: 5px solid #3cec10e1;  */
+    box-shadow: 0 0 25px rgba(189, 228, 31, 0.738);
+    transition: transform 0.3s ease; 
+    transform: scale(1.3);
+}
+
+.profile-pic:hover {
+    transform: scale(1.4);
+}
+
+@media (max-width: 900px) {
+    .hero-layout {
+        flex-direction: column-reverse;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .hero-text {
+        max-width: 100%;
+    }
+
+    .profile-pic {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .hero__summary-box {
+        margin: 0 auto; 
+    }
 }
