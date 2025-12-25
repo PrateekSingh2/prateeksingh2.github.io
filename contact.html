@@ -16,7 +16,7 @@
             margin: 54px auto;
             background: rgb(255, 255, 255);
             padding: 46.5px;
-            border-radius: 40px;
+            border-radius: 25px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.1);
             text-align: center;
             box-shadow: var(--shadow-hover);
@@ -27,10 +27,21 @@
             box-shadow: 0px 0px 10px rgba(218, 165, 32, 0.636);
         }
     
-        .contact-container h1 { color: #2c3e50; margin-bottom: 10px; }
-        .contact-container p { color: #666; margin-bottom: 40px; }
+        .contact-container h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
 
-        .contact-list { list-style: none; text-align: left; }
+        .contact-container p {
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .contact-list {
+            list-style: none;
+            text-align: left;
+        }
+
         .contact-item {
             margin-bottom: 20.25px;
             padding: 10px;
@@ -39,8 +50,27 @@
             align-items: center;
             justify-content: space-between;
         }
-        .contact-info strong { display: block; color: #2c3e50; font-size: 1.1rem; }
-        .contact-info span { color: #777; font-size: 0.9rem; }
+
+        .contact-info {
+            flex: 1;
+            min-width: 0;
+            margin-right: 15px;
+        }
+
+        .contact-info strong { 
+            display: block; 
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .contact-info span { 
+            color: #777;
+            font-size: 0.9rem;
+            display: block;
+            word-break: break-all; 
+            overflow-wrap: break-word; 
+            line-height: 1.4;
+        }
         
         .contact-btn {
             padding: 8px 15px;
@@ -51,9 +81,16 @@
             border-radius: 15px;
             border: 1px solid rgba(75, 5, 5, 0.763);
         }
-        .contact-btn.linkedin { background-color: rgba(61, 181, 61, 0.541); }
-        .contact-btn.github { background-color: rgba(61, 181, 61, 0.541); }
-        .contact-btn:hover { 
+
+        .contact-btn.linkedin{
+            background-color: rgba(61, 181, 61, 0.541);
+        }
+
+        .contact-btn.github{
+            background-color: rgba(61, 181, 61, 0.541);
+        }
+
+        .contact-btn:hover{ 
             background-color: rgba(0, 128, 0, 0.566);
             color: black;
             border-radius: 25px;
