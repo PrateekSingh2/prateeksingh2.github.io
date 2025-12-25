@@ -3,51 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Prateek Singh</title>
+    <title>About - Prateek Singh</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&amp;family=Space+Grotesk:wght@300;500;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-
     <header class="header">
         <div class="container header__content">
-            <a href="index.html" class="logo" style="font-family: Comic Sans MS;">Prateek Singh</a>
+            <a href="index.html" class="logo"><span class="nav-logo">&lt;/&gt;</span>Prateek Singh</a>
             <nav class="nav">
-                <a href="index.html" class="btn nav-button"><span class="nav-logo">🪪</span><b> About</b></a>
-                <a href="cpRecord.html" class="btn nav-button"><span class="nav-logo">📈</span><b>CP Record</b></a>
-                <a href="project.html" class="btn nav-button"><span class="nav-logo">🗂️</span><b>Project</b></a>
-                <a href="skills.html" class="btn nav-button"><span class="nav-logo">🏆</span><b>Skills & Certs</b></a>
-                <a href="contact.html" class="btn nav-button"><span class="nav-logo">🌏</span><b>Contact</b></a>
-                
+                <a href="index.html"><button class="nav-button"><b>About</b></button></a>
+                <a href="skills.html"><button class="nav-button"><b>Skills</b></button></a>
+                <a href="project.html"><button class="nav-button"><b>Projects</b></button></a>
+                <a href="cpRecord.html"><button class="nav-button"><b>CP Record</b></button></a>
             </nav>
-            <a href="Resume.pdf" class="btn btn--primary" download>⬇️ Resume</a>
         </div>
     </header>
 
-    <main class="main container">
-        <section id="about" class="section section--hero-enhanced">
-            
-            <div class="hero-layout">
-                
-                <div class="hero-text">
-                    <p class="hero__greeting">Hello, I'm</p>
-                    <h1 class="hero__name">Prateek Singh</h1>
-                    <p class="hero__role">
-                        Aspiring Software Engineer | B.Tech AI '29 | Python, C++, Java(DSA)
-                    </p>
-                    
-                    <div class="hero__summary-box">
-                        <p class="hero__summary">
-                            I am a first year B.Tech student in Artificial Intelligence, currently pursuing my graduation from Madhav Institute of Technology and Science, Gwalior. I am an eager problem solver with hands-on experience in <b>Python, C, C++, JAVA(DSA)</b>, and <b>MySQL</b> database management. I enjoy building efficient solutions and developing new projects. My hobby is to listen music while coding.
-                        </p>
+    <main class="main">
+        <section class="section section--hero-enhanced">
+            <div class="container">
+                <div class="hero-layout">
+                    <div class="hero-text">
+                        <p>Hello, I'm</p>
+                        <h1 class="hero__name">Prateek Singh</h1>
+                        <div class="hero__role-animated" >
+                            <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&pause=1000&color=1A237E&width=435&lines=AI+%26+ML+Enthusiast;Aspiring+Software+Engineer;JAVA-DSA+Problem+Solver;Proficient+in+Python,+C,+C%2B%2B,+Java" alt="Typing Animation" />
+                        </div>
+                        <div class="hero__summary-box">
+                            <p>I am a passionate developer with a strong foundation in data structures and algorithms. I love building projects and efficient solutions and exploring new technologies. Always eager to learn and contribute to impactful projects.</p>
+                        </div>
+                        <div class="hero__cta-group">
+                            <a href="Resume.pdf" class="btn btn-home-primary1" download=""><i class="fa-solid fa-download"></i> Resume</a>
+                            <a href="contact.html" class="btn btn-home-primary2"><i class="fa-brands fa-linkedin icon"></i> Contact</a>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <div class="profile-image-container">
+                            <div class="animated-border"></div>
+                            <img src="my-photo.jpg" alt="Prateek Singh" class="profile-pic">
+                        </div>
                     </div>
                 </div>
-
-                <div class="hero-image">
-                    <img src="my-photo.jpg" alt="Prateek Singh" class="profile-pic">
-                </div>
-
             </div>
-
         </section>
     </main>
     
@@ -56,10 +56,9 @@
     </script>
 
     <footer class="footer">
-        <div class="container footer__content">
-            <p>&copy; 2025 Prateek Singh. All rights reserved.</p>
+        <div class="container">
+            <p>Made with 🎵 by Prateek Singh &copy; 2025</p>
         </div>
     </footer>
-
 </body>
 </html>

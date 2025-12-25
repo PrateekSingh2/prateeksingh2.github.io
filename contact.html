@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Me - Prateek Singh</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         
         /* --- CONTACT SECTION --- */
@@ -40,20 +43,20 @@
         .contact-info span { color: #777; font-size: 0.9rem; }
         
         .contact-btn {
-            background-color: #f5f5f6;
-            color: rgb(0, 0, 0);
-            border: 2px solid var(--color-accent);
             padding: 8px 15px;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: all 0.3s;
             text-align: center;
+
+            background-color: rgba(61, 181, 61, 0.541);
+            color: rgb(0, 0, 0);
+            border-radius: 15px;
+            border: 1px solid rgba(75, 5, 5, 0.763);
         }
-        .contact-btn.linkedin { background-color: #f5f5f6; }
-        .contact-btn.github { background-color: #f5f5f6; }
+        .contact-btn.linkedin { background-color: rgba(61, 181, 61, 0.541); }
+        .contact-btn.github { background-color: rgba(61, 181, 61, 0.541); }
         .contact-btn:hover { 
-            background-color: var(--color-primary);
-            color: white;
+            background-color: rgba(0, 128, 0, 0.566);
+            color: black;
+            border-radius: 25px;
             border-color: var(--color-primary);
         }
 
@@ -63,16 +66,13 @@
 
     <header class="header">
         <div class="container header__content">
-            <a href="index.html" class="logo" style="font-family: Comic Sans MS;">Prateek Singh</a>
+            <a href="index.html" class="logo"><span class="nav-logo">&lt;/&gt;</span>Prateek Singh</a>
             <nav class="nav">
-                <a href="index.html" class="btn nav-button"><span class="nav-logo">🪪</span><b> About</b></a>
-                <a href="cpRecord.html" class="btn nav-button"><span class="nav-logo">📈</span><b>CP Record</b></a>
-                <a href="project.html" class="btn nav-button"><span class="nav-logo">🗂️</span><b>Project</b></a>
-                <a href="skills.html" class="btn nav-button"><span class="nav-logo">🏆</span><b>Skills & Certs</b></a>
-                <a href="contact.html" class="btn nav-button"><span class="nav-logo">🌏</span><b>Contact</b></a>
-                
+                <a href="index.html"><button class="nav-button"><b>About</b></button></a>
+                <a href="skills.html"><button class="nav-button"><b>Skills</b></button></a>
+                <a href="project.html"><button class="nav-button"><b>Projects</b></button></a>
+                <a href="cpRecord.html"><button class="nav-button"><b>CP Record</b></button></a>
             </nav>
-            <a href="Resume.pdf" class="btn btn--primary" download>⬇️ Resume</a>
         </div>
     </header>
 
@@ -95,7 +95,7 @@
                     <strong>LinkedIn</strong>
                     <span>Connect professionally</span>
                 </div>
-                <a href="https://www.linkedin.com/in/rajawatprateeksingh" target="_blank" class="contact-btn linkedin">🤝Connect</a>
+                <a href="https://www.linkedin.com/in/rajawatprateeksingh" target="_blank" class="contact-btn linkedin"><i class="fa-brands fa-linkedin icon"></i> Connect</a>
             </li>
 
             <li class="contact-item">
@@ -103,7 +103,7 @@
                     <strong>GitHub</strong>
                     <span>Check my Repos</span>
                 </div>
-                <a href="https://github.com/prateeksingh2" target="_blank" class="contact-btn github">👀 Follow</a>
+                <a href="https://github.com/prateeksingh2" target="_blank" class="contact-btn github"><i class="fa-brands fa-github icon"></i> Follow</a>
             </li>
         </ul>
     </div>
@@ -113,8 +113,8 @@
     </script>
 
     <footer class="footer">
-        <div class="container footer__content">
-            <p>&copy; 2025 Prateek Singh. All rights reserved.</p>
+        <div class="container">
+            <p>Made with 🎵 by Prateek Singh &copy; 2025</p>
         </div>
     </footer>
 
