@@ -39,39 +39,26 @@ Follow these steps to run the project locally.
 
 *Steps:*
 
-1.  *Clone the repository*## Screenshots
+  ***1.)** Clone the repository*
+    
+    git clone https://github.com/krishnapaliwal8791/VoteX.git
+     
 
-    bash
-    git clone [https://github.com/krishnapaliwal8791/VoteX.git](https://github.com/krishnapaliwal8791/VoteX.git)
-    cd VoteX
+***2.)** Setup XAMPP for VoteX:*
+   Go to Local Disk C:  where your windows is installed.
+Then, go to XAMPP folder and setup with following things:
+* Copy VoteX folder that you cloned from GIT and paste in "htdocs" named folder inside XAMPP folder.
+* Then move out of it, and copy VoteX_Private folder and paste in XAMPP itself.
+* Then go to "cgi-bin" name folder in parent folder of XAMPP and create a folder named as "VoteX" and in that create ".cgi" extension files of all the C++ files that are listed in VoteX->Backend folder from CMD by executing 
+* **g++ yourfile.cpp -o yourfile.cgi**
     
 
-2.  *Install Dependencies*
-    bash
-    # For backend
-    cd backend
-    npm install  # or pip install -r requirements.txt
+**3.)** *Run the Application*
+  Open XAMPP dashboard and then run Apache server.
+Now open your browser and type:
 
-    # For frontend
-    cd ../frontend
-    npm install
-    
 
-3.  *Environment Variables*
-    Create a .env file in the root directory and add the following:
-    env
-    PORT=5000
-    DB_URI=your_database_connection_string
-    JWT_SECRET=your_secret_key
-    
-
-4.  *Run the Application*
-    bash
-    # Start Backend
-    npm start
-
-    # Start Frontend
-    npm run dev
+**localhost/VoteX/index.html**
     
 
 ## 🤝 Contributing
@@ -83,14 +70,12 @@ Contributions are welcome! Please follow these steps:
 4.  Push to the branch (git push origin feature/AmazingFeature).
 5.  Open a Pull Request.
 
-## 📄 License
 
-Distributed under the MIT License. See LICENSE for more information.
 
 ## 📞 Contact
 
 *Krishna Paliwal*
 * GitHub: [krishnapaliwal8791](https://github.com/krishnapaliwal8791)
-* Email: [Your Email Here]
+* Email: 25ai1kr75@mitsgwl.ac.in
 
 Project Link: [https://github.com/krishnapaliwal8791/VoteX](https://github.com/krishnapaliwal8791/VoteX)
