@@ -1190,7 +1190,7 @@
             pathEl.setAttribute('d', d);
             pathEl.setAttribute('stroke', color);
         }
-        
+
         async function resolveStatusDataUrl() {
             return 'https://gist.githubusercontent.com/PrateekSingh2/62f5475d8aa4056187d568a5a64521a5/raw/status-data.json';
         }
@@ -1202,7 +1202,7 @@
                 const data = await loadStatusData();
                 latestStatusData = data;
                 syncServerCountdown(data);
-                
+
                 let onlineCount = 0;
                 let totalLatency = 0;
                 let fastestNode = { name: '-', latency: Infinity };
@@ -1214,103 +1214,103 @@
                     const s = services[i];
                     const sData = data.services.find(sd => sd.id === s.id);
                     if (!sData) continue;
-                    
+
                     s.history = sData.history || [];
                     s.status = sData.status || 'PENDING';
-                    
+
                     const latency = s.history.length > 0 ? s.history[s.history.length - 1] : -1;
-                    
+
                     document.getElementById(`status-text-${i}`).textContent = s.status;
-                    
+
                     if (s.status === 'ONLINE' || s.status === 'DEGRADED') {
                         onlineCount++;
                         totalLatency += latency;
                         if (latency < fastestNode.latency) fastestNode = { name: s.name, latency };
                         if (latency > slowestNode.latency) slowestNode = { name: s.name, latency };
                     }
-                    
+
                     logToTerminal(`${s.name} status: ${s.status}${latency !== -1 ? ` (${latency}ms)` : ''}`, s.status === 'ONLINE' ? 'success' : (s.status === 'DEGRADED' ? 'warning' : 'error'));
 
-                // Update Card UI
-                const color = s.status === 'ONLINE' ? 'var(--success)' : (s.status === 'DEGRADED' ? 'var(--warning)' : 'var(--danger)');
-                const badge = document.getElementById(`badge-${i}`);
+                    // Update Card UI
+                    const color = s.status === 'ONLINE' ? 'var(--success)' : (s.status === 'DEGRADED' ? 'var(--warning)' : 'var(--danger)');
+                    const badge = document.getElementById(`badge-${i}`);
 
-                badge.style.color = color;
-                badge.style.backgroundColor = `${color}15`;
-                badge.style.borderColor = `${color}40`;
-                badge.style.boxShadow = `0 0 15px ${color}20`;
+                    badge.style.color = color;
+                    badge.style.backgroundColor = `${color}15`;
+                    badge.style.borderColor = `${color}40`;
+                    badge.style.boxShadow = `0 0 15px ${color}20`;
 
-                document.getElementById(`dot-${i}`).style.background = color;
-                document.getElementById(`status-text-${i}`).textContent = s.status;
+                    document.getElementById(`dot-${i}`).style.background = color;
+                    document.getElementById(`status-text-${i}`).textContent = s.status;
 
-                const latEl = document.getElementById(`card-latency-${i}`);
-                latEl.textContent = latency !== -1 ? `${latency}ms` : 'FAIL';
-                latEl.style.color = latency !== -1 ? 'inherit' : 'var(--danger)';
+                    const latEl = document.getElementById(`card-latency-${i}`);
+                    latEl.textContent = latency !== -1 ? `${latency}ms` : 'FAIL';
+                    latEl.style.color = latency !== -1 ? 'inherit' : 'var(--danger)';
 
-                const lastCheckTime = new Date(data.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                document.getElementById(`card-check-${i}`).textContent = lastCheckTime;
+                    const lastCheckTime = new Date(data.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    document.getElementById(`card-check-${i}`).textContent = lastCheckTime;
 
-                // Update Details
-                const validH = s.history.filter(h => h !== -1);
-                if (validH.length > 0) {
-                    const avgH = Math.round(validH.reduce((a, b) => a + b, 0) / validH.length);
-                    const maxH = Math.max(...validH);
-                    document.getElementById(`detail-avg-${i}`).textContent = `${avgH}ms`;
-                    document.getElementById(`detail-max-${i}`).textContent = `${maxH}ms`;
+                    // Update Details
+                    const validH = s.history.filter(h => h !== -1);
+                    if (validH.length > 0) {
+                        const avgH = Math.round(validH.reduce((a, b) => a + b, 0) / validH.length);
+                        const maxH = Math.max(...validH);
+                        document.getElementById(`detail-avg-${i}`).textContent = `${avgH}ms`;
+                        document.getElementById(`detail-max-${i}`).textContent = `${maxH}ms`;
+                    }
+
+                    updateSparkline(i, s.history, color);
+
+                    // Update Topology Node Status
+                    const topoNode = document.getElementById(`topo-${s.id}`);
+                    if (topoNode) {
+                        topoNode.className = `topo-node ${s.status === 'ONLINE' || s.status === 'DEGRADED' ? 'online' : 'offline'}`;
+                        const statEl = document.getElementById(`topo-stat-${s.id}`);
+                        if (statEl) statEl.textContent = latency !== -1 ? `${latency}ms` : 'OFFLINE';
+                    }
                 }
 
-                updateSparkline(i, s.history, color);
+                // Update Core Metrics
+                const avgLatency = onlineCount ? Math.round(totalLatency / onlineCount) : 0;
+                const healthPercent = Math.round((onlineCount / services.length) * 100);
 
-                // Update Topology Node Status
-                const topoNode = document.getElementById(`topo-${s.id}`);
-                if (topoNode) {
-                    topoNode.className = `topo-node ${s.status === 'ONLINE' || s.status === 'DEGRADED' ? 'online' : 'offline'}`;
-                    const statEl = document.getElementById(`topo-stat-${s.id}`);
-                    if (statEl) statEl.textContent = latency !== -1 ? `${latency}ms` : 'OFFLINE';
+                // Hero Updates
+                const ringOffset = 283 - (283 * healthPercent / 100);
+                const ringColor = healthPercent === 100 ? 'var(--success)' : (healthPercent >= 60 ? 'var(--warning)' : 'var(--danger)');
+                const ringPath = document.getElementById('health-ring-path');
+
+                ringPath.style.strokeDashoffset = ringOffset;
+                ringPath.style.stroke = ringColor;
+
+                animateValue('hero-health-score', parseInt(document.getElementById('hero-health-score').textContent) || 0, healthPercent, 1000, '%');
+
+                const heroText = document.getElementById('hero-status-text');
+                heroText.textContent = healthPercent === 100 ? 'All Systems Operational' : (healthPercent > 0 ? 'Partial Outage Detected' : 'Major System Outage');
+                heroText.className = healthPercent === 100 ? '' : 'status-outage';
+
+                // Header Updates
+                document.getElementById('header-nodes').textContent = `${onlineCount}/${services.length} Nodes`;
+
+                // Remove skeletons on first load
+                if (firstLoad) {
+                    document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
+                    firstLoad = false;
                 }
-            }
 
-            // Update Core Metrics
-            const avgLatency = onlineCount ? Math.round(totalLatency / onlineCount) : 0;
-            const healthPercent = Math.round((onlineCount / services.length) * 100);
+                // Stats Row
+                animateValue('metric-nodes', parseInt(document.getElementById('metric-nodes').textContent) || 0, onlineCount, 1000, `/${services.length}`);
+                animateValue('metric-avg', parseInt(document.getElementById('metric-avg').textContent) || 0, avgLatency, 1000, 'ms');
+                animateValue('metric-downtimes', parseInt(document.getElementById('metric-downtimes').textContent) || 0, downtimesToday, 1000);
 
-            // Hero Updates
-            const ringOffset = 283 - (283 * healthPercent / 100);
-            const ringColor = healthPercent === 100 ? 'var(--success)' : (healthPercent >= 60 ? 'var(--warning)' : 'var(--danger)');
-            const ringPath = document.getElementById('health-ring-path');
+                // Analytics Dashboard
+                document.getElementById('analytics-fastest').textContent = fastestNode.name !== '-' ? `${fastestNode.name} (${fastestNode.latency}ms)` : 'N/A';
+                document.getElementById('analytics-slowest').textContent = slowestNode.name !== '-' ? `${slowestNode.name} (${slowestNode.latency}ms)` : 'N/A';
+                document.getElementById('analytics-avg').textContent = `${avgLatency}ms`;
+                document.getElementById('analytics-score').textContent = `${healthPercent}/100`;
 
-            ringPath.style.strokeDashoffset = ringOffset;
-            ringPath.style.stroke = ringColor;
+                // Footer
+                logToTerminal(`Health check synchronized. Next check in 5m.`, 'info');
 
-            animateValue('hero-health-score', parseInt(document.getElementById('hero-health-score').textContent) || 0, healthPercent, 1000, '%');
-
-            const heroText = document.getElementById('hero-status-text');
-            heroText.textContent = healthPercent === 100 ? 'All Systems Operational' : (healthPercent > 0 ? 'Partial Outage Detected' : 'Major System Outage');
-            heroText.className = healthPercent === 100 ? '' : 'status-outage';
-
-            // Header Updates
-            document.getElementById('header-nodes').textContent = `${onlineCount}/${services.length} Nodes`;
-
-            // Remove skeletons on first load
-            if (firstLoad) {
-                document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
-                firstLoad = false;
-            }
-
-            // Stats Row
-            animateValue('metric-nodes', parseInt(document.getElementById('metric-nodes').textContent) || 0, onlineCount, 1000, `/${services.length}`);
-            animateValue('metric-avg', parseInt(document.getElementById('metric-avg').textContent) || 0, avgLatency, 1000, 'ms');
-            animateValue('metric-downtimes', parseInt(document.getElementById('metric-downtimes').textContent) || 0, downtimesToday, 1000);
-
-            // Analytics Dashboard
-            document.getElementById('analytics-fastest').textContent = fastestNode.name !== '-' ? `${fastestNode.name} (${fastestNode.latency}ms)` : 'N/A';
-            document.getElementById('analytics-slowest').textContent = slowestNode.name !== '-' ? `${slowestNode.name} (${slowestNode.latency}ms)` : 'N/A';
-            document.getElementById('analytics-avg').textContent = `${avgLatency}ms`;
-            document.getElementById('analytics-score').textContent = `${healthPercent}/100`;
-
-            // Footer
-            logToTerminal(`Health check synchronized. Next check in 5m.`, 'info');
-            
             } catch (err) {
                 logToTerminal(`Failed to fetch status data from Agent: ${err.message}`, 'error');
                 countdownTime = 60; // Retry faster if failed
@@ -1357,8 +1357,11 @@
         }, 1000);
 
         setInterval(() => {
-            if (latestStatusData) {
+            if (latestStatusData && latestStatusData.lastUpdated > 0) {
                 syncServerCountdown(latestStatusData);
+            } else {
+                if (countdownTime > 0) countdownTime--;
+                document.getElementById('countdown-timer').textContent = countdownTime;
             }
         }, 1000);
 
