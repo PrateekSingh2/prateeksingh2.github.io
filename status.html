@@ -1225,6 +1225,7 @@
         async function monitor() {
             if (isFetching) return;
             isFetching = true;
+            document.getElementById('terminal-logs').innerHTML = ''; // Clear previous logs
             logToTerminal(`Fetching latest infrastructure health data from Agent...`, 'info');
             try {
                 const data = await loadStatusData();
