@@ -11,7 +11,7 @@ const refreshIntervalMs = Number(process.env.REFRESH_INTERVAL_MS || 300000);
 
 const servicesConfig = [
     { id: "main", url: "https://algolib.netlify.app" },
-    { id: "disc", url: "https://discover-algolib.netlify.app/discover" },
+    { id: "assets", url: "https://res.cloudinary.com/" },
     { id: "e1", url: "https://rajawatprateek-algolib-engine-1.hf.space" },
     { id: "e2", url: "https://rajawatprateek-algolib-engine-2.hf.space" },
     { id: "e3", url: "https://rajawatprateek-algolib-engine-3.hf.space" },
