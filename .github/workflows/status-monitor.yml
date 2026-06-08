@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: write
     env:
-      STATUS_DATA_TARGET: ${ { secrets.STATUS_DATA_TARGET } }
+      STATUS_DATA_TARGET: ${{ secrets.STATUS_DATA_TARGET }}
       GIST_ID: ${{ secrets.GIST_ID }}
       GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
       GIST_FILENAME: ${{ secrets.GIST_FILENAME }}
