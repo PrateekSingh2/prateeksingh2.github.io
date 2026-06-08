@@ -1194,8 +1194,7 @@
         async function monitor() {
             logToTerminal(`Fetching latest infrastructure health data from Agent...`, 'info');
             try {
-                const res = await fetch('status-data.json?t=' + Date.now());
-                const data = await res.json();
+                const data = await loadStatusData();
                 
                 let onlineCount = 0;
                 let totalLatency = 0;
@@ -1312,6 +1311,39 @@
                 logToTerminal(`Failed to fetch status data from Agent: ${err.message}`, 'error');
                 countdownTime = 60; // Retry faster if failed
             }
+        }
+
+        async function loadStatusData() {
+            const candidates = [
+                'public/status-data.json?t=' + Date.now(),
+                'status-data.json?t=' + Date.now()
+            ];
+
+            let lastError = null;
+
+            for (const url of candidates) {
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) {
+                        throw new Error(`HTTP ${res.status}`);
+                    }
+
+                    const contentType = res.headers.get('content-type') || '';
+                    if (!contentType.includes('application/json')) {
+                        const text = await res.text();
+                        if (text.trim().startsWith('<')) {
+                            throw new Error(`Expected JSON, received HTML from ${url}`);
+                        }
+                        return JSON.parse(text);
+                    }
+
+                    return await res.json();
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+
+            throw lastError || new Error('Unable to load status data');
         }
 
         // Clocks and Timers

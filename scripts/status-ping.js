@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const dataFile = path.join(__dirname, 'status-data.json');
+const dataFile = path.join(__dirname, '../public/status-data.json');
 
 const servicesConfig = [
     { id: "main", url: "https://algolib.netlify.app" },
