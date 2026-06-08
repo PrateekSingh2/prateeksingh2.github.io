@@ -1192,21 +1192,7 @@
         }
 
         async function resolveStatusDataUrl() {
-            try {
-                const res = await fetch('status-config.json?t=' + Date.now(), { cache: 'no-store' });
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}`);
-                }
-
-                const config = await res.json();
-                if (config && typeof config.statusDataUrl === 'string' && config.statusDataUrl.trim()) {
-                    return config.statusDataUrl.trim();
-                }
-            } catch (error) {
-                // Fall through to the default same-origin data file.
-            }
-
-            return 'public/status-data.json';
+            return 'https://gist.githubusercontent.com/PrateekSingh2/62f5475d8aa4056187d568a5a64521a5/raw/status-data.json';
         }
 
         // Main Monitor Logic
