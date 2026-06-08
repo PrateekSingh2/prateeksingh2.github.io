@@ -5,7 +5,10 @@ on:
     branches:
       - main
   schedule:
-    - cron: '*/5 * * * *'
+    # Staggered cron schedule (runs at min 2, 7, 12, etc.)
+    # This specifically bypasses GitHub's massive global queue at the exact 5/10/15 min marks,
+    # making the trigger infinitely more robust and less likely to be dropped or delayed!
+    - cron: '2/5 * * * *'
   workflow_dispatch:
 
 jobs:
