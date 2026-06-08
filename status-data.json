@@ -1,0 +1,14 @@
+{
+  "lastUpdated": 0,
+  "downtimesToday": 0,
+  "services": [
+    { "id": "main", "history": [], "status": "PENDING" },
+    { "id": "disc", "history": [], "status": "PENDING" },
+    { "id": "e1", "history": [], "status": "PENDING" },
+    { "id": "e2", "history": [], "status": "PENDING" },
+    { "id": "e3", "history": [], "status": "PENDING" },
+    { "id": "groq", "history": [], "status": "PENDING" },
+    { "id": "firebase", "history": [], "status": "PENDING" },
+    { "id": "supabase", "history": [], "status": "PENDING" }
+  ]
+}

@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlgoLib Infrastructure Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #04060B;
+            --text: #F8FAFC;
+            --muted: #94A3B8;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --primary: #3B82F6;
+            --accent: #8B5CF6;
+
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.06);
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html {
+            font-size: 14px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: inherit;
+        }
+
+        /* Background System */
+        .bg-layer-1 {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: -5;
+        }
+
+        .aurora-container {
+            position: fixed;
+            inset: 0;
+            z-index: -4;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .aurora-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.25;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+
+        .blob-1 {
+            top: -20%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: var(--primary);
+        }
+
+        .blob-2 {
+            bottom: -20%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: var(--accent);
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            top: 30%;
+            left: 40%;
+            width: 40vw;
+            height: 40vw;
+            background: var(--success);
+            opacity: 0.15;
+            animation-delay: -10s;
+        }
+
+        .noise {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            opacity: 0.04;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+
+        canvas#particles {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        #spotlight {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            pointer-events: none;
+            background: radial-gradient(600px circle at var(--x, 50%) var(--y, 50%), rgba(255, 255, 255, 0.04), transparent 40%);
+            mix-blend-mode: screen;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(50px, -50px) scale(1.15);
+            }
+        }
+
+        /* Layout */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-radius: 100px;
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+            background: rgba(4, 6, 11, 0.6);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4ad6ff, #0a84ff);
+            box-shadow: 0 0 20px rgba(10, 132, 255, 0.4);
+            display: grid;
+            place-items: center;
+        }
+
+        .header-left h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-left p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .header-right {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .nodes-badge {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nodes-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        /* Hero */
+        .hero-section {
+            display: flex;
+            align-items: center;
+            gap: 4rem;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: radial-gradient(circle at right, rgba(16, 185, 129, 0.08), transparent 60%);
+            pointer-events: none;
+        }
+
+        .health-ring-wrapper {
+            position: relative;
+            width: 180px;
+            height: 180px;
+        }
+
+        .health-ring {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.3));
+        }
+
+        .health-score-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .hero-content h2 {
+            font-size: 2.8rem;
+            margin: 0 0 0.5rem 0;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: var(--success);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .hero-content p.status-outage {
+            color: var(--danger);
+        }
+
+        /* Metrics */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s var(--bezier);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            background: var(--glass-hover);
+        }
+
+        .metric-title {
+            font-size: 0.85rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Services Grid */
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .service-card {
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.5s var(--bezier);
+        }
+
+        .service-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            pointer-events: none;
+            transition: all 0.5s var(--bezier);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: var(--glass-hover);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 30px rgba(59, 130, 246, 0.1);
+        }
+
+        .service-card:hover::after {
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-header h3 {
+            margin: 0 0 0.3rem 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .card-header p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.5);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .card-metrics {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .metric-block {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .metric-block .label {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .metric-block .value {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .sparkline-container {
+            height: 40px;
+            width: 100%;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+
+        .sparkline {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .service-detail {
+            max-height: 0px;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.5s var(--bezier);
+            margin-top: 0px;
+        }
+
+        .detail-divider {
+            height: 1px;
+            background: var(--glass-border);
+            margin: 0.8rem 0;
+        }
+
+        .service-detail p {
+            margin: 0 0 0.6rem 0;
+            font-size: 0.85rem;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .service-detail a {
+            color: var(--primary);
+            text-decoration: none;
+            word-break: break-all;
+            text-align: right;
+        }
+
+        .service-detail a:hover {
+            text-decoration: underline;
+        }
+
+        /* Analytics & Topology Sections */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .analytics-section,
+        .topology-section {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .analytics-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.2rem;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s var(--bezier);
+        }
+
+        .analytics-item:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .analytics-item span {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .analytics-item strong {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Topology Map */
+        .topology-map {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem 0;
+            position: relative;
+        }
+
+        .topo-row {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .topo-node {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            padding: 0.8rem 1.8rem;
+            border-radius: 100px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            min-width: 140px;
+        }
+
+        .topo-node .stat {
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-family: monospace;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+            transition: color 0.3s ease;
+        }
+
+        .topo-node.online .stat {
+            color: var(--success);
+        }
+
+        .topo-node.offline .stat {
+            color: var(--danger);
+        }
+
+        .topo-node.online {
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.15);
+        }
+
+        .topo-node.offline {
+            border-color: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+            opacity: 0.7;
+        }
+
+        .topo-conn {
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(to bottom, var(--success), transparent);
+            opacity: 0.5;
+        }
+
+        /* Terminal */
+        .terminal-section {
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 350px;
+        }
+
+        .terminal-header {
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mac-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mac-dots .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .mac-dots .red {
+            background: #FF5F56;
+        }
+
+        .mac-dots .yellow {
+            background: #FFBD2E;
+        }
+
+        .mac-dots .green {
+            background: #27C93F;
+        }
+
+        .terminal-title {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .terminal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        .terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            animation: typeIn 0.3s ease forwards;
+            opacity: 0;
+            transform: translateX(-10px);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .log-entry .timestamp {
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .log-entry.info {
+            color: var(--text);
+        }
+
+        .log-entry.success {
+            color: var(--success);
+        }
+
+        .log-entry.warning {
+            color: var(--warning);
+        }
+
+        .log-entry.error {
+            color: var(--danger);
+        }
+
+        @keyframes typeIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Footer */
+        footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-radius: 24px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        /* Utilities */
+        .skeleton {
+            color: transparent !important;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+            border-radius: 6px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        /* Motion & Reveals */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUpFade 0.8s var(--bezier) forwards;
+        }
+
+        .delay-1 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes slideUpFade {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media(max-width: 1024px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .hero-section {
+                flex-direction: column;
+                text-align: center;
+                gap: 2rem;
+                padding: 2rem;
+            }
+
+            .hero-section::after {
+                background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08), transparent 70%);
+            }
+        }
+
+        @media(max-width: 600px) {
+            .app-container {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .metrics-row {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                border-radius: 20px;
+                text-align: center;
+                padding: 1.5rem;
+            }
+
+            .header-right {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+
+            footer {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background System -->
+    <div class="bg-layer-1"></div>
+    <div class="aurora-container">
+        <div class="aurora-blob blob-1"></div>
+        <div class="aurora-blob blob-2"></div>
+        <div class="aurora-blob blob-3"></div>
+    </div>
+    <div class="noise"></div>
+    <canvas id="particles"></canvas>
+    <div id="spotlight"></div>
+
+    <div class="app-container">
+
+        <!-- Header -->
+        <header class="glass-panel reveal">
+            <div class="header-left">
+                <div class="logo-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="white" stroke="none">
+                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1>AlgoLib Infrastructure</h1>
+                    <p>Command Center</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="time" id="clock">--:--:--</div>
+                <div style="color: var(--muted)">Refresh in <span id="countdown-timer"
+                        style="color: var(--text)">60</span>s</div>
+                <div class="nodes-badge">
+                    <div class="dot"></div>
+                    <span id="header-nodes">0/0 Nodes</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero -->
+        <section class="hero-section glass-panel reveal delay-1">
+            <div class="health-ring-wrapper">
+                <svg viewBox="0 0 100 100" class="health-ring">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8">
+                    </circle>
+                    <circle id="health-ring-path" cx="50" cy="50" r="45" fill="none" stroke="var(--success)"
+                        stroke-width="8" stroke-dasharray="283" stroke-dashoffset="0"
+                        style="transition: stroke-dashoffset 1.5s var(--bezier), stroke 1s var(--bezier);"></circle>
+                </svg>
+                <div class="health-score-text" id="hero-health-score">--%</div>
+            </div>
+            <div class="hero-content">
+                <h2>Infrastructure Health</h2>
+                <p id="hero-status-text">Analyzing Systems...</p>
+            </div>
+        </section>
+
+        <!-- Metrics -->
+        <section class="metrics-row reveal delay-2">
+            <div class="glass-panel metric-card">
+                <span class="metric-title">Nodes Online</span>
+                <span class="metric-value skeleton" id="metric-nodes">0/0</span>
+            </div>
+            <div class="glass-panel metric-card">
+                <span class="metric-title">Average Latency</span>
+                <span class="metric-value skeleton" id="metric-avg">0ms</span>
+            </div>
+            <div class="glass-panel metric-card">
+                <span class="metric-title">Downtimes Today</span>
+                <span class="metric-value skeleton" id="metric-downtimes">0</span>
+            </div>
+            <div class="glass-panel metric-card">
+                <span class="metric-title">Uptime</span>
+                <span class="metric-value" id="metric-uptime">0.00%</span>
+            </div>
+        </section>
+
+        <!-- Services Grid -->
+        <section class="service-grid reveal delay-3" id="service-grid"></section>
+
+        <div class="two-col">
+            <!-- Analytics Dashboard -->
+            <section class="analytics-section glass-panel reveal delay-3">
+                <h3 class="section-title">📊 Analytics Dashboard</h3>
+                <div class="analytics-grid">
+                    <div class="analytics-item">
+                        <span>Fastest Node</span>
+                        <strong id="analytics-fastest" class="skeleton">Analyzing...</strong>
+                    </div>
+                    <div class="analytics-item">
+                        <span>Slowest Node</span>
+                        <strong id="analytics-slowest" class="skeleton">Analyzing...</strong>
+                    </div>
+                    <div class="analytics-item">
+                        <span>Avg Response Time</span>
+                        <strong id="analytics-avg" class="skeleton">--ms</strong>
+                    </div>
+                    <div class="analytics-item">
+                        <span>Health Score</span>
+                        <strong id="analytics-score" class="skeleton">--/100</strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Infrastructure Topology -->
+            <section class="topology-section glass-panel reveal delay-3">
+                <h3 class="section-title">🕸️ Cluster Map</h3>
+                <div class="topology-map">
+                    <div class="topo-row">
+                        <div class="topo-node" id="topo-main">Frontend <span class="stat"
+                                id="topo-stat-main">--ms</span></div>
+                        <div class="topo-node" id="topo-disc">Discover Hub <span class="stat"
+                                id="topo-stat-disc">--ms</span></div>
+                    </div>
+                    <div class="topo-conn"></div>
+                    <div class="topo-row">
+                        <div class="topo-node" id="topo-e1">Engine 1 <span class="stat" id="topo-stat-e1">--ms</span>
+                        </div>
+                        <div class="topo-node" id="topo-e2">Engine 2 <span class="stat" id="topo-stat-e2">--ms</span>
+                        </div>
+                        <div class="topo-node" id="topo-e3">Engine 3 <span class="stat" id="topo-stat-e3">--ms</span>
+                        </div>
+                        <div class="topo-node" id="topo-groq">Groq LPU <span class="stat"
+                                id="topo-stat-groq">--ms</span></div>
+                    </div>
+                    <div class="topo-conn"></div>
+                    <div class="topo-row">
+                        <div class="topo-node" id="topo-firebase">Firebase <span class="stat"
+                                id="topo-stat-firebase">--ms</span></div>
+                        <div class="topo-node" id="topo-supabase">Supabase <span class="stat"
+                                id="topo-stat-supabase">--ms</span></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Live Terminal -->
+        <section class="terminal-section glass-panel reveal delay-3">
+            <div class="terminal-header">
+                <div class="mac-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <span class="terminal-title">Live Cluster Console</span>
+            </div>
+            <div class="terminal-body" id="terminal-logs"></div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="glass-panel reveal delay-3">
+            <div>AlgoLib Infrastructure Command Center</div>
+            <div class="footer-links">
+                <span id="footer-uptime">Uptime: 99.98%</span>
+                <span id="footer-updated">Last Updated: --:--</span>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // System State
+        const services = [
+            { id: "main", name: "Main App", desc: "Production Environment", url: "https://algolib.netlify.app" },
+            { id: "disc", name: "Discover", desc: "Discovery Portal", url: "https://algolib.netlify.app/discover" },
+            { id: "e1", name: "Engine-1", desc: "AI Inference Cluster A", url: "https://rajawatprateek-algolib-engine-1.hf.space/health" },
+            { id: "e2", name: "Engine-2", desc: "AI Inference Cluster B", url: "https://rajawatprateek-algolib-engine-2.hf.space/health" },
+            { id: "e3", name: "Engine-3", desc: "AI Inference Cluster C", url: "https://rajawatprateek-algolib-engine-3.hf.space/health" },
+            { id: "groq", name: "Groq API", desc: "Fast LLM Inference", url: "https://api.groq.com/" },
+            { id: "firebase", name: "Firebase Auth", desc: "Identity & Realtime", url: "https://firebase.google.com/" },
+            { id: "supabase", name: "Supabase DB", desc: "Relational Data", url: "https://oedombnbmzsuaasgpsio.supabase.co" }
+        ];
+
+        const MAX_HISTORY = 20;
+        let downtimesToday = 0;
+        let countdownTime = 300;
+        let firstLoad = true;
+
+        // Initialize Services State
+        services.forEach(s => {
+            s.history = [];
+            s.status = 'PENDING';
+            s.expanded = false;
+        });
+
+        // Spotlight Physics
+        document.addEventListener('mousemove', (e) => {
+            document.documentElement.style.setProperty('--x', e.clientX + 'px');
+            document.documentElement.style.setProperty('--y', e.clientY + 'px');
+        });
+
+        // Particles Physics
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let cw, ch;
+        let particlesArray = [];
+
+        function initParticles() {
+            cw = canvas.width = window.innerWidth;
+            ch = canvas.height = window.innerHeight;
+            particlesArray = [];
+            for (let i = 0; i < 40; i++) {
+                particlesArray.push({
+                    x: Math.random() * cw, y: Math.random() * ch,
+                    r: Math.random() * 1.5 + 0.5,
+                    dx: (Math.random() - 0.5) * 0.4, dy: (Math.random() - 0.5) * 0.4,
+                    opacity: Math.random() * 0.4 + 0.1
+                });
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, cw, ch);
+            particlesArray.forEach(p => {
+                p.x += p.dx; p.y += p.dy;
+                if (p.x < 0 || p.x > cw) p.dx *= -1;
+                if (p.y < 0 || p.y > ch) p.dy *= -1;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+                ctx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        window.addEventListener('resize', initParticles);
+        initParticles();
+        animateParticles();
+
+        // UI Initializer
+        function initUI() {
+            const grid = document.getElementById('service-grid');
+            grid.innerHTML = services.map((s, i) => `
+        <div class="glass-panel service-card" id="card-${i}" onclick="toggleServiceDetail(${i})">
+          <div class="card-header">
+            <div>
+              <h3>${s.name}</h3>
+              <p>${s.desc}</p>
+            </div>
+            <div class="status-badge" id="badge-${i}" style="color: var(--muted); background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">
+               <div class="pulse-dot" id="dot-${i}" style="background: var(--muted)"></div>
+               <span id="status-text-${i}">PENDING</span>
+            </div>
+          </div>
+          <div class="card-metrics">
+            <div class="metric-block">
+              <span class="label">Latency</span>
+              <span class="value skeleton" id="card-latency-${i}">--ms</span>
+            </div>
+            <div class="metric-block">
+              <span class="label">Last Check</span>
+              <span class="value skeleton" id="card-check-${i}">Waiting</span>
+            </div>
+          </div>
+          <div class="sparkline-container">
+            <svg viewBox="0 0 100 30" class="sparkline" preserveAspectRatio="none">
+               <path id="sparkline-${i}" d="" fill="none" stroke="var(--muted)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></path>
+            </svg>
+          </div>
+          <div class="service-detail" id="detail-${i}">
+             <div class="detail-divider"></div>
+             <p><strong>Endpoint</strong> <a href="${s.url}" target="_blank" onclick="event.stopPropagation()">${s.url.replace('https://', '')}</a></p>
+             <p><strong>Avg Response</strong> <span id="detail-avg-${i}">--ms</span></p>
+             <p><strong>Max Latency</strong> <span id="detail-max-${i}">--ms</span></p>
+          </div>
+        </div>
+      `).join('');
+
+            // Initialize Uptime Animation
+            animateFloatValue('metric-uptime', 0, 99.98, 2000, '%');
+        }
+
+        // Toggle Details
+        window.toggleServiceDetail = function (i) {
+            const s = services[i];
+            const detail = document.getElementById(`detail-${i}`);
+            const card = document.getElementById(`card-${i}`);
+            if (s.expanded) {
+                detail.style.maxHeight = '0px';
+                detail.style.opacity = '0';
+                detail.style.marginTop = '0px';
+                s.expanded = false;
+            } else {
+                detail.style.maxHeight = '150px';
+                detail.style.opacity = '1';
+                detail.style.marginTop = '15px';
+                s.expanded = true;
+            }
+        };
+
+        // Terminal Logger
+        function logToTerminal(msg, type = "info") {
+            const t = document.getElementById('terminal-logs');
+            const el = document.createElement('div');
+            el.className = `log-entry ${type}`;
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            el.innerHTML = `<span class="timestamp">[${time}]</span> <span class="log-msg">${msg}</span>`;
+            t.appendChild(el);
+            t.scrollTop = t.scrollHeight;
+        }
+
+        // Number Animators
+        function animateValue(id, start, end, duration, suffix = '') {
+            const obj = document.getElementById(id);
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 4);
+                obj.textContent = Math.floor(ease * (end - start) + start) + suffix;
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function animateFloatValue(id, start, end, duration, suffix = '') {
+            const obj = document.getElementById(id);
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 4);
+                obj.textContent = (ease * (end - start) + start).toFixed(2) + suffix;
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Sparkline Generator
+        function updateSparkline(index, history, color) {
+            const pathEl = document.getElementById(`sparkline-${index}`);
+            if (!pathEl || history.length < 2) return;
+
+            const validHistory = history.map(h => h === -1 ? 1000 : h); // -1 is offline/timeout
+            const max = Math.max(...validHistory, 100);
+            const step = 100 / (MAX_HISTORY - 1);
+
+            let d = validHistory.map((val, i) => {
+                const x = i * step;
+                const y = 30 - ((val / max) * 26); // 4px padding top
+                return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+            }).join(' ');
+
+            pathEl.setAttribute('d', d);
+            pathEl.setAttribute('stroke', color);
+        }
+
+        // Main Monitor Logic
+        async function monitor() {
+            logToTerminal(`Fetching latest infrastructure health data from Agent...`, 'info');
+            try {
+                const res = await fetch('status-data.json?t=' + Date.now());
+                const data = await res.json();
+                
+                let onlineCount = 0;
+                let totalLatency = 0;
+                let fastestNode = { name: '-', latency: Infinity };
+                let slowestNode = { name: '-', latency: -1 };
+
+                downtimesToday = data.downtimesToday || 0;
+
+                for (let i = 0; i < services.length; i++) {
+                    const s = services[i];
+                    const sData = data.services.find(sd => sd.id === s.id);
+                    if (!sData) continue;
+                    
+                    s.history = sData.history || [];
+                    s.status = sData.status || 'PENDING';
+                    
+                    const latency = s.history.length > 0 ? s.history[s.history.length - 1] : -1;
+                    
+                    document.getElementById(`status-text-${i}`).textContent = s.status;
+                    
+                    if (s.status === 'ONLINE' || s.status === 'DEGRADED') {
+                        onlineCount++;
+                        totalLatency += latency;
+                        if (latency < fastestNode.latency) fastestNode = { name: s.name, latency };
+                        if (latency > slowestNode.latency) slowestNode = { name: s.name, latency };
+                    }
+                    
+                    logToTerminal(`${s.name} status: ${s.status}${latency !== -1 ? ` (${latency}ms)` : ''}`, s.status === 'ONLINE' ? 'success' : (s.status === 'DEGRADED' ? 'warning' : 'error'));
+
+                // Update Card UI
+                const color = s.status === 'ONLINE' ? 'var(--success)' : (s.status === 'DEGRADED' ? 'var(--warning)' : 'var(--danger)');
+                const badge = document.getElementById(`badge-${i}`);
+
+                badge.style.color = color;
+                badge.style.backgroundColor = `${color}15`;
+                badge.style.borderColor = `${color}40`;
+                badge.style.boxShadow = `0 0 15px ${color}20`;
+
+                document.getElementById(`dot-${i}`).style.background = color;
+                document.getElementById(`status-text-${i}`).textContent = s.status;
+
+                const latEl = document.getElementById(`card-latency-${i}`);
+                latEl.textContent = latency !== -1 ? `${latency}ms` : 'FAIL';
+                latEl.style.color = latency !== -1 ? 'inherit' : 'var(--danger)';
+
+                const lastCheckTime = new Date(data.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                document.getElementById(`card-check-${i}`).textContent = lastCheckTime;
+
+                // Update Details
+                const validH = s.history.filter(h => h !== -1);
+                if (validH.length > 0) {
+                    const avgH = Math.round(validH.reduce((a, b) => a + b, 0) / validH.length);
+                    const maxH = Math.max(...validH);
+                    document.getElementById(`detail-avg-${i}`).textContent = `${avgH}ms`;
+                    document.getElementById(`detail-max-${i}`).textContent = `${maxH}ms`;
+                }
+
+                updateSparkline(i, s.history, color);
+
+                // Update Topology Node Status
+                const topoNode = document.getElementById(`topo-${s.id}`);
+                if (topoNode) {
+                    topoNode.className = `topo-node ${s.status === 'ONLINE' || s.status === 'DEGRADED' ? 'online' : 'offline'}`;
+                    const statEl = document.getElementById(`topo-stat-${s.id}`);
+                    if (statEl) statEl.textContent = latency !== -1 ? `${latency}ms` : 'OFFLINE';
+                }
+            }
+
+            // Update Core Metrics
+            const avgLatency = onlineCount ? Math.round(totalLatency / onlineCount) : 0;
+            const healthPercent = Math.round((onlineCount / services.length) * 100);
+
+            // Hero Updates
+            const ringOffset = 283 - (283 * healthPercent / 100);
+            const ringColor = healthPercent === 100 ? 'var(--success)' : (healthPercent >= 60 ? 'var(--warning)' : 'var(--danger)');
+            const ringPath = document.getElementById('health-ring-path');
+
+            ringPath.style.strokeDashoffset = ringOffset;
+            ringPath.style.stroke = ringColor;
+
+            animateValue('hero-health-score', parseInt(document.getElementById('hero-health-score').textContent) || 0, healthPercent, 1000, '%');
+
+            const heroText = document.getElementById('hero-status-text');
+            heroText.textContent = healthPercent === 100 ? 'All Systems Operational' : (healthPercent > 0 ? 'Partial Outage Detected' : 'Major System Outage');
+            heroText.className = healthPercent === 100 ? '' : 'status-outage';
+
+            // Header Updates
+            document.getElementById('header-nodes').textContent = `${onlineCount}/${services.length} Nodes`;
+
+            // Remove skeletons on first load
+            if (firstLoad) {
+                document.querySelectorAll('.skeleton').forEach(el => el.classList.remove('skeleton'));
+                firstLoad = false;
+            }
+
+            // Stats Row
+            animateValue('metric-nodes', parseInt(document.getElementById('metric-nodes').textContent) || 0, onlineCount, 1000, `/${services.length}`);
+            animateValue('metric-avg', parseInt(document.getElementById('metric-avg').textContent) || 0, avgLatency, 1000, 'ms');
+            animateValue('metric-downtimes', parseInt(document.getElementById('metric-downtimes').textContent) || 0, downtimesToday, 1000);
+
+            // Analytics Dashboard
+            document.getElementById('analytics-fastest').textContent = fastestNode.name !== '-' ? `${fastestNode.name} (${fastestNode.latency}ms)` : 'N/A';
+            document.getElementById('analytics-slowest').textContent = slowestNode.name !== '-' ? `${slowestNode.name} (${slowestNode.latency}ms)` : 'N/A';
+            document.getElementById('analytics-avg').textContent = `${avgLatency}ms`;
+            document.getElementById('analytics-score').textContent = `${healthPercent}/100`;
+
+            // Footer
+            const lastUpdatedTime = new Date(data.lastUpdated).toLocaleTimeString();
+            document.getElementById('footer-updated').textContent = `Last Updated: ${lastUpdatedTime}`;
+            countdownTime = 300;
+            logToTerminal(`Health check synchronized. Next check in 5m.`, 'info');
+            
+            } catch (err) {
+                logToTerminal(`Failed to fetch status data from Agent: ${err.message}`, 'error');
+                countdownTime = 60; // Retry faster if failed
+            }
+        }
+
+        // Clocks and Timers
+        setInterval(() => {
+            document.getElementById('clock').textContent = new Date().toLocaleTimeString();
+        }, 1000);
+
+        setInterval(() => {
+            countdownTime--;
+            if (countdownTime < 0) countdownTime = 300;
+            document.getElementById('countdown-timer').textContent = countdownTime;
+        }, 1000);
+
+        // Bootstrap
+        initUI();
+        monitor();
+        setInterval(monitor, 300000);
+
+    </script>
+</body>
+
+</html>
