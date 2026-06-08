@@ -16,7 +16,7 @@ jobs:
     env:
       STATUS_DATA_TARGET: gist
       GIST_ID: ${{ secrets.GIST_ID }}
-      GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
+      GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
       GIST_FILENAME: ${{ secrets.GIST_FILENAME }}
       REFRESH_INTERVAL_MS: '300000'
       
