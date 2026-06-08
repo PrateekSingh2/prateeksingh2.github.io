@@ -6,7 +6,7 @@ const configFile = path.join(__dirname, '../status-config.json');
 const publishMode = process.env.STATUS_DATA_TARGET || 'local';
 const gistId = process.env.GIST_ID;
 const gistFilename = process.env.GIST_FILENAME || 'status-data.json';
-const githubToken = process.env.GITHUB_TOKEN;
+const githubToken = process.env.GIST_TOKEN;
 const refreshIntervalMs = Number(process.env.REFRESH_INTERVAL_MS || 300000);
 
 const servicesConfig = [
