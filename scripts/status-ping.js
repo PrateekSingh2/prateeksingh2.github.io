@@ -6,7 +6,7 @@ const configFile = path.join(__dirname, '../status-config.json');
 const publishMode = process.env.STATUS_DATA_TARGET || 'local';
 const gistId = process.env.GIST_ID;
 const gistFilename = process.env.GIST_FILENAME || 'status-data.json';
-const githubToken = process.env.GIST_TOKEN;
+const gistToken = process.env.GIST_TOKEN;
 const refreshIntervalMs = Number(process.env.REFRESH_INTERVAL_MS || 300000);
 
 const servicesConfig = [
@@ -52,11 +52,11 @@ function normalizeData(data) {
 }
 
 async function loadExistingData() {
-    if (publishMode === 'gist' && gistId && githubToken) {
+    if (publishMode === 'gist' && gistId && gistToken) {
         try {
             const response = await fetch(`https://api.github.com/gists/${gistId}`, {
                 headers: {
-                    'Authorization': `Bearer ${githubToken}`,
+                    'Authorization': `Bearer ${gistToken}`,
                     'Accept': 'application/vnd.github+json',
                     'X-GitHub-Api-Version': '2022-11-28'
                 }
@@ -140,14 +140,14 @@ async function run() {
     data.nextRefreshAt = data.lastUpdated + refreshIntervalMs;
 
     if (publishMode === 'gist') {
-        if (!gistId || !githubToken) {
-            throw new Error('Gist mode requires GIST_ID and GITHUB_TOKEN');
+        if (!gistId || !gistToken) {
+            throw new Error('Gist mode requires GIST_ID and GIST_TOKEN');
         }
 
         const response = await fetch(`https://api.github.com/gists/${gistId}`, {
             method: 'PATCH',
             headers: {
-                'Authorization': `Bearer ${githubToken}`,
+                'Authorization': `Bearer ${gistToken}`,
                 'Accept': 'application/vnd.github+json',
                 'X-GitHub-Api-Version': '2022-11-28',
                 'Content-Type': 'application/json'
