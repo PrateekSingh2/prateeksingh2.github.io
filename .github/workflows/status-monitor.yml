@@ -11,6 +11,7 @@ on:
 jobs:
   ping-services:
     runs-on: ubuntu-latest
+    environment: Status
     permissions:
       contents: write
     env:
