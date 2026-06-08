@@ -13,6 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      STATUS_DATA_TARGET: gist
+      GIST_ID: ${{ secrets.GIST_ID }}
+      GITHUB_TOKEN: ${{ secrets.GIST_TOKEN }}
+      GIST_FILENAME: ${{ secrets.GIST_FILENAME }}
+      REFRESH_INTERVAL_MS: '300000'
       
     steps:
       - name: Checkout code
@@ -25,11 +31,3 @@ jobs:
           
       - name: Run Ping Script
         run: node scripts/status-ping.js
-        
-      - name: Commit and Push Data
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add public/status-data.json
-          git commit -m "chore: update infrastructure status data" || echo "No changes to commit"
-          git push

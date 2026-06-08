@@ -1019,6 +1019,7 @@
         let downtimesToday = 0;
         let countdownTime = 300;
         let firstLoad = true;
+        let latestStatusData = null;
 
         // Initialize Services State
         services.forEach(s => {
@@ -1178,7 +1179,7 @@
 
             const validHistory = history.map(h => h === -1 ? 1000 : h); // -1 is offline/timeout
             const max = Math.max(...validHistory, 100);
-            const step = 100 / (MAX_HISTORY - 1);
+            const step = 100 / (validHistory.length - 1);
 
             let d = validHistory.map((val, i) => {
                 const x = i * step;
@@ -1190,11 +1191,31 @@
             pathEl.setAttribute('stroke', color);
         }
 
+        async function resolveStatusDataUrl() {
+            try {
+                const res = await fetch('status-config.json?t=' + Date.now(), { cache: 'no-store' });
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+
+                const config = await res.json();
+                if (config && typeof config.statusDataUrl === 'string' && config.statusDataUrl.trim()) {
+                    return config.statusDataUrl.trim();
+                }
+            } catch (error) {
+                // Fall through to the default same-origin data file.
+            }
+
+            return 'public/status-data.json';
+        }
+
         // Main Monitor Logic
         async function monitor() {
             logToTerminal(`Fetching latest infrastructure health data from Agent...`, 'info');
             try {
                 const data = await loadStatusData();
+                latestStatusData = data;
+                syncServerCountdown(data);
                 
                 let onlineCount = 0;
                 let totalLatency = 0;
@@ -1302,9 +1323,6 @@
             document.getElementById('analytics-score').textContent = `${healthPercent}/100`;
 
             // Footer
-            const lastUpdatedTime = new Date(data.lastUpdated).toLocaleTimeString();
-            document.getElementById('footer-updated').textContent = `Last Updated: ${lastUpdatedTime}`;
-            countdownTime = 300;
             logToTerminal(`Health check synchronized. Next check in 5m.`, 'info');
             
             } catch (err) {
@@ -1314,8 +1332,9 @@
         }
 
         async function loadStatusData() {
+            const statusDataUrl = await resolveStatusDataUrl();
             const candidates = [
-                'public/status-data.json?t=' + Date.now(),
+                `${statusDataUrl}${statusDataUrl.includes('?') ? '&' : '?'}t=${Date.now()}`,
                 'status-data.json?t=' + Date.now()
             ];
 
@@ -1352,10 +1371,19 @@
         }, 1000);
 
         setInterval(() => {
-            countdownTime--;
-            if (countdownTime < 0) countdownTime = 300;
-            document.getElementById('countdown-timer').textContent = countdownTime;
+            if (latestStatusData) {
+                syncServerCountdown(latestStatusData);
+            }
         }, 1000);
+
+        function syncServerCountdown(data) {
+            const refreshIntervalMs = data?.refreshIntervalMs || 300000;
+            const nextRefreshAt = data?.nextRefreshAt || (data?.lastUpdated ? data.lastUpdated + refreshIntervalMs : Date.now() + refreshIntervalMs);
+            const remainingSeconds = Math.max(0, Math.ceil((nextRefreshAt - Date.now()) / 1000));
+            countdownTime = remainingSeconds;
+            document.getElementById('countdown-timer').textContent = remainingSeconds;
+            document.getElementById('footer-updated').textContent = `Last Updated: ${data?.lastUpdated ? new Date(data.lastUpdated).toLocaleTimeString() : '--:--'}`;
+        }
 
         // Bootstrap
         initUI();
