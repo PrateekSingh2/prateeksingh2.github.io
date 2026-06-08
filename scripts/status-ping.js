@@ -11,12 +11,12 @@ const refreshIntervalMs = Number(process.env.REFRESH_INTERVAL_MS || 300000);
 
 const servicesConfig = [
     { id: "main", url: "https://algolib.netlify.app" },
-    { id: "disc", url: "https://algolib.netlify.app/discover" },
-    { id: "e1", url: "https://rajawatprateek-algolib-engine-1.hf.space/health" },
-    { id: "e2", url: "https://rajawatprateek-algolib-engine-2.hf.space/health" },
-    { id: "e3", url: "https://rajawatprateek-algolib-engine-3.hf.space/health" },
+    { id: "disc", url: "https://discover-algolib.netlify.app/discover" },
+    { id: "e1", url: "https://rajawatprateek-algolib-engine-1.hf.space" },
+    { id: "e2", url: "https://rajawatprateek-algolib-engine-2.hf.space" },
+    { id: "e3", url: "https://rajawatprateek-algolib-engine-3.hf.space" },
     { id: "groq", url: "https://api.groq.com/" },
-    { id: "firebase", url: "https://firebase.google.com/" },
+    { id: "firebase", url: "https://algolib-e0567.firebaseapp.com" },
     { id: "supabase", url: "https://oedombnbmzsuaasgpsio.supabase.co" }
 ];
 
@@ -93,10 +93,10 @@ async function pingUrl(url) {
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
-        
+
         await fetch(url + "?t=" + Date.now(), { signal: controller.signal });
         clearTimeout(timeoutId);
-        
+
         return Math.round(performance.now() - start);
     } catch (e) {
         return -1;
@@ -108,9 +108,9 @@ async function run() {
 
     const now = new Date();
     const lastDate = new Date(data.lastUpdated || 0);
-    
+
     // Reset downtimes daily
-    if(now.getUTCDate() !== lastDate.getUTCDate()) {
+    if (now.getUTCDate() !== lastDate.getUTCDate()) {
         data.downtimesToday = 0;
     }
 
@@ -122,7 +122,7 @@ async function run() {
         }
 
         const latency = await pingUrl(config.url);
-        
+
         if (latency === -1) {
             serviceData.status = "OFFLINE";
             data.downtimesToday++;
@@ -133,6 +133,13 @@ async function run() {
         }
 
         serviceData.history.push(latency);
+
+        // 12 hours = 720 minutes. At 5 min intervals, that's 144 data points.
+        // Slice the array to keep only the last 144 entries (sliding window).
+        const MAX_HISTORY = 144;
+        if (serviceData.history.length > MAX_HISTORY) {
+            serviceData.history = serviceData.history.slice(-MAX_HISTORY);
+        }
     }
 
     data.lastUpdated = now.getTime();

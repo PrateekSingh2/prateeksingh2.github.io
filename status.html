@@ -1006,8 +1006,8 @@
         // System State
         const services = [
             { id: "main", name: "Main App", desc: "Production Environment", url: "https://algolib.netlify.app" },
-            { id: "disc", name: "Discover", desc: "Discovery Portal", url: "https://algolib.netlify.app/discover" },
-            { id: "e1", name: "Engine-1", desc: "AI Inference Cluster A", url: "https://rajawatprateek-algolib-engine-1.hf.space/health" },
+            { id: "disc", name: "Discover", desc: "Discovery Portal", url: "https://discover-algolib.netlify.app/discover" },
+            { id: "e1", name: "Engine-1", desc: "AI Inference Cluster A", url: "https://rajawatprateek-algolib-engine-1.hf.space/healt" },
             { id: "e2", name: "Engine-2", desc: "AI Inference Cluster B", url: "https://rajawatprateek-algolib-engine-2.hf.space/health" },
             { id: "e3", name: "Engine-3", desc: "AI Inference Cluster C", url: "https://rajawatprateek-algolib-engine-3.hf.space/health" },
             { id: "groq", name: "Groq API", desc: "Fast LLM Inference", url: "https://api.groq.com/" },
@@ -1097,13 +1097,10 @@
             </div>
           </div>
           <div class="sparkline-container">
-            <svg viewBox="0 0 100 30" class="sparkline" preserveAspectRatio="none">
-               <path id="sparkline-${i}" d="" fill="none" stroke="var(--muted)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"></path>
-            </svg>
+            <svg viewBox="0 0 144 30" class="sparkline" preserveAspectRatio="none"></svg>
           </div>
           <div class="service-detail" id="detail-${i}">
              <div class="detail-divider"></div>
-             <p><strong>Endpoint</strong> <a href="${s.url}" target="_blank" onclick="event.stopPropagation()">${s.url.replace('https://', '')}</a></p>
              <p><strong>Avg Response</strong> <span id="detail-avg-${i}">--ms</span></p>
              <p><strong>Max Latency</strong> <span id="detail-max-${i}">--ms</span></p>
           </div>
@@ -1172,36 +1169,78 @@
             window.requestAnimationFrame(step);
         }
 
-        // Sparkline Generator
         function updateSparkline(index, history, color) {
-            const pathEl = document.getElementById(`sparkline-${index}`);
-            if (!pathEl || history.length < 2) return;
+            const svg = document.querySelector(`#card-${index} .sparkline`);
+            if (!svg || history.length === 0) return;
 
-            const validHistory = history.map(h => h === -1 ? 1000 : h); // -1 is offline/timeout
+            // Render only the last 48 points (4 hours) to reduce density and add space!
+            const RENDER_POINTS = 48;
+            const renderHistory = history.slice(-RENDER_POINTS);
+
+            const validHistory = renderHistory.map(h => h === -1 ? 1000 : h);
             const max = Math.max(...validHistory, 100);
-            const step = 100 / (validHistory.length - 1);
 
-            let d = validHistory.map((val, i) => {
-                const x = i * step;
-                const y = 30 - ((val / max) * 26); // 4px padding top
-                return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+            // Adjust viewBox to standard density
+            svg.setAttribute('viewBox', `0 0 ${Math.max(1, renderHistory.length - 1)} 30`);
+
+            let dLine = validHistory.map((val, i) => {
+                const heightVal = val === -1 ? max : val;
+                const height = Math.max(1, (heightVal / max) * 26);
+                const y = 30 - height;
+                return `${i === 0 ? 'M' : 'L'} ${i} ${y}`;
             }).join(' ');
 
-            pathEl.setAttribute('d', d);
-            pathEl.setAttribute('stroke', color);
+            if (validHistory.length === 1) {
+                const h = 30 - Math.max(1, (validHistory[0] / max) * 26);
+                dLine = `M 0 ${h} L 1 ${h}`;
+            }
+
+            const lastX = Math.max(0, validHistory.length - 1);
+            const dFill = `${dLine} L ${lastX} 30 L 0 30 Z`;
+
+            const defs = `
+              <defs>
+                <linearGradient id="grad-${index}" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="${color}" stop-opacity="0.4" />
+                  <stop offset="100%" stop-color="${color}" stop-opacity="0.0" />
+                </linearGradient>
+              </defs>
+            `;
+
+            svg.innerHTML = `
+                ${defs}
+                <path d="${dFill}" fill="url(#grad-${index})" stroke="none"></path>
+                <path d="${dLine}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+            `;
         }
 
         async function resolveStatusDataUrl() {
             return 'https://gist.githubusercontent.com/PrateekSingh2/62f5475d8aa4056187d568a5a64521a5/raw/status-data.json';
         }
 
+        let isFetching = false;
+        let lastKnownUpdateTime = 0;
+
         // Main Monitor Logic
         async function monitor() {
+            if (isFetching) return;
+            isFetching = true;
             logToTerminal(`Fetching latest infrastructure health data from Agent...`, 'info');
             try {
                 const data = await loadStatusData();
                 latestStatusData = data;
-                syncServerCountdown(data);
+
+                if (data.lastUpdated > lastKnownUpdateTime) {
+                    lastKnownUpdateTime = data.lastUpdated;
+                    syncServerCountdown(data);
+                } else if (data.lastUpdated > 0 && countdownTime <= 0) {
+                    countdownTime = 15; // Delay retry if action is still processing
+                    logToTerminal(`Waiting for updated data from Agent...`, 'warning');
+                    isFetching = false;
+                    return; // Prevent redundant logging until new data arrives
+                } else {
+                    syncServerCountdown(data);
+                }
 
                 let onlineCount = 0;
                 let totalLatency = 0;
@@ -1309,11 +1348,13 @@
                 document.getElementById('analytics-score').textContent = `${healthPercent}/100`;
 
                 // Footer
-                logToTerminal(`Health check synchronized. Next check in 5m.`, 'info');
+                logToTerminal(`Health check synchronized.`, 'info');
 
             } catch (err) {
                 logToTerminal(`Failed to fetch status data from Agent: ${err.message}`, 'error');
                 countdownTime = 60; // Retry faster if failed
+            } finally {
+                isFetching = false;
             }
         }
 
@@ -1363,6 +1404,10 @@
                 if (countdownTime > 0) countdownTime--;
                 document.getElementById('countdown-timer').textContent = countdownTime;
             }
+
+            if (countdownTime <= 0) {
+                monitor();
+            }
         }, 1000);
 
         function syncServerCountdown(data) {
@@ -1377,7 +1422,6 @@
         // Bootstrap
         initUI();
         monitor();
-        setInterval(monitor, 300000);
 
     </script>
 </body>
