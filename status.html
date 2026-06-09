@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlgoLib Infrastructure Command Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Check for iframe embed mode to hide header
+        if (window.location.search.includes('embed=true')) {
+            document.documentElement.classList.add('embed-mode');
+        }
+    </script>
     <style>
         :root {
             --bg: #04060B;
@@ -26,6 +32,18 @@
         html {
             font-size: 14px;
         }
+        
+        html.embed-mode header {
+            display: none !important;
+        }
+
+        html.embed-mode .app-container {
+            padding-top: 0 !important;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
 
         body {
             margin: 0;
@@ -36,6 +54,8 @@
             color: var(--text);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
         *,
