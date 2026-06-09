@@ -227,8 +227,8 @@
         .hero-section {
             display: flex;
             align-items: center;
-            gap: 4rem;
-            padding: 3rem;
+            gap: 2rem;
+            padding: 1.5rem 2.5rem;
             position: relative;
             overflow: hidden;
         }
@@ -246,15 +246,16 @@
 
         .health-ring-wrapper {
             position: relative;
-            width: 180px;
-            height: 180px;
+            width: 80px;
+            height: 80px;
+            flex-shrink: 0;
         }
 
         .health-ring {
             transform: rotate(-90deg);
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.3));
+            filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.3));
         }
 
         .health-score-text {
@@ -263,19 +264,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
         }
 
         .hero-content h2 {
-            font-size: 2.8rem;
-            margin: 0 0 0.5rem 0;
+            font-size: 1.8rem;
+            margin: 0 0 0.3rem 0;
             font-weight: 700;
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
         }
 
         .hero-content p {
-            font-size: 1.2rem;
+            font-size: 0.95rem;
             color: var(--success);
             margin: 0;
             display: flex;
@@ -421,13 +422,20 @@
 
         .card-metrics {
             display: flex;
-            gap: 2rem;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
         }
 
         .metric-block {
             display: flex;
             flex-direction: column;
             gap: 0.2rem;
+        }
+
+        .metric-block:last-child {
+            align-items: flex-end;
+            text-align: right;
         }
 
         .metric-block .label {
@@ -451,6 +459,7 @@
             width: 100%;
             height: 100%;
             overflow: visible;
+            transform: translateZ(0);
         }
 
         .service-detail {
@@ -544,75 +553,64 @@
             font-weight: 600;
         }
 
-        /* Topology Map */
-        .topology-map {
+        /* Node Performance (Replaced Topology Map) */
+        .node-perf-list {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            padding: 1.5rem 0;
-            position: relative;
-        }
-
-        .topo-row {
-            display: flex;
-            gap: 3rem;
-            justify-content: center;
+            gap: 1rem;
+            padding: 0.5rem 0;
             width: 100%;
         }
 
-        .topo-node {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--glass-border);
-            padding: 0.8rem 1.8rem;
-            border-radius: 100px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            position: relative;
-            z-index: 2;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+        .node-perf-item {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 0.2rem;
-            min-width: 140px;
+            gap: 1rem;
         }
 
-        .topo-node .stat {
-            font-size: 0.75rem;
+        .node-perf-label {
+            width: 120px;
+            font-size: 0.85rem;
             color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .node-perf-bar-bg {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .node-perf-bar-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 0.8s var(--bezier), background-color 0.8s var(--bezier);
+            position: relative;
+        }
+
+        .node-perf-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .node-perf-value {
+            width: 60px;
+            text-align: right;
+            font-size: 0.85rem;
             font-family: monospace;
-            letter-spacing: 0.5px;
-            opacity: 0.8;
-            transition: color 0.3s ease;
-        }
-
-        .topo-node.online .stat {
-            color: var(--success);
-        }
-
-        .topo-node.offline .stat {
-            color: var(--danger);
-        }
-
-        .topo-node.online {
-            border-color: rgba(16, 185, 129, 0.5);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 10px rgba(16, 185, 129, 0.15);
-        }
-
-        .topo-node.offline {
-            border-color: rgba(239, 68, 68, 0.5);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
-            opacity: 0.7;
-        }
-
-        .topo-conn {
-            width: 2px;
-            height: 30px;
-            background: linear-gradient(to bottom, var(--success), transparent);
-            opacity: 0.5;
+            font-weight: 600;
         }
 
         /* Terminal */
@@ -622,12 +620,14 @@
             display: flex;
             flex-direction: column;
             height: 350px;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5), 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .terminal-header {
             padding: 1rem 1.5rem;
-            background: rgba(0, 0, 0, 0.4);
-            border-bottom: 1px solid var(--glass-border);
+            background: rgba(5, 10, 20, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
             gap: 1rem;
@@ -660,16 +660,20 @@
             font-family: monospace;
             font-size: 0.9rem;
             color: var(--muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .terminal-body {
             padding: 1.5rem;
             overflow-y: auto;
             flex: 1;
-            font-family: 'Consolas', monospace;
-            font-size: 0.9rem;
+            font-family: 'Consolas', 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
             line-height: 1.6;
             scroll-behavior: smooth;
+            background: #050810;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
         }
 
         .terminal-body::-webkit-scrollbar {
@@ -686,33 +690,38 @@
         }
 
         .log-entry {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
             animation: typeIn 0.3s ease forwards;
             opacity: 0;
             transform: translateX(-10px);
             display: flex;
             gap: 1rem;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.1);
         }
 
         .log-entry .timestamp {
-            color: var(--muted);
+            color: #4b5563;
             white-space: nowrap;
         }
 
         .log-entry.info {
-            color: var(--text);
+            color: #60a5fa;
+            text-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
         }
 
         .log-entry.success {
-            color: var(--success);
+            color: #34d399;
+            text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);
         }
 
         .log-entry.warning {
-            color: var(--warning);
+            color: #fbbf24;
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
         }
 
         .log-entry.error {
-            color: var(--danger);
+            color: #f87171;
+            text-shadow: 0 0 8px rgba(248, 113, 113, 0.3);
         }
 
         @keyframes typeIn {
@@ -813,24 +822,57 @@
             }
 
             .metrics-row {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .metric-card {
+                padding: 1rem;
+            }
+
+            .metric-title {
+                font-size: 0.7rem;
+            }
+
+            .metric-value {
+                font-size: 1.4rem;
             }
 
             header {
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
                 gap: 1rem;
                 border-radius: 20px;
-                text-align: center;
-                padding: 1.5rem;
+                padding: 1rem;
             }
 
             .header-right {
-                flex-direction: column;
-                gap: 0.5rem;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                gap: 0.8rem;
+                width: 100%;
             }
 
             .service-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .topo-row {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .card-metrics {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 1rem;
             }
 
             footer {
@@ -871,9 +913,12 @@
                 </div>
             </div>
             <div class="header-right">
-                <div class="time" id="clock">--:--:--</div>
-                <div style="color: var(--muted)">Refresh in <span id="countdown-timer"
-                        style="color: var(--text)">60</span>s</div>
+                <div
+                    style="display: flex; align-items: center; gap: 0.4rem; background: rgba(255,255,255,0.03); padding: 0.4rem 0.8rem; border-radius: 100px; border: 1px solid var(--glass-border);">
+                    <span style="color: var(--muted); font-size: 0.85rem;">Server Time:</span>
+                    <span id="clock"
+                        style="color: var(--text); font-family: monospace; font-weight: 600; font-size: 0.9rem;">--:--:--</span>
+                </div>
                 <div class="nodes-badge">
                     <div class="dot"></div>
                     <span id="header-nodes">0/0 Nodes</span>
@@ -946,34 +991,13 @@
                 </div>
             </section>
 
-            <!-- Infrastructure Topology -->
+            <!-- Node Performance -->
             <section class="topology-section glass-panel reveal delay-3">
-                <h3 class="section-title">🕸️ Cluster Map</h3>
-                <div class="topology-map">
-                    <div class="topo-row">
-                        <div class="topo-node" id="topo-main">Frontend <span class="stat"
-                                id="topo-stat-main">--ms</span></div>
-                        <div class="topo-node" id="topo-assets">Assets CDN <span class="stat"
-                                id="topo-stat-assets">--ms</span></div>
-                    </div>
-                    <div class="topo-conn"></div>
-                    <div class="topo-row">
-                        <div class="topo-node" id="topo-e1">Engine 1 <span class="stat" id="topo-stat-e1">--ms</span>
-                        </div>
-                        <div class="topo-node" id="topo-e2">Engine 2 <span class="stat" id="topo-stat-e2">--ms</span>
-                        </div>
-                        <div class="topo-node" id="topo-e3">Engine 3 <span class="stat" id="topo-stat-e3">--ms</span>
-                        </div>
-                        <div class="topo-node" id="topo-groq">Vectoris AI <span class="stat"
-                                id="topo-stat-groq">--ms</span></div>
-                    </div>
-                    <div class="topo-conn"></div>
-                    <div class="topo-row">
-                        <div class="topo-node" id="topo-firebase">Firebase <span class="stat"
-                                id="topo-stat-firebase">--ms</span></div>
-                        <div class="topo-node" id="topo-supabase">Supabase <span class="stat"
-                                id="topo-stat-supabase">--ms</span></div>
-                    </div>
+                <h3 class="section-title">⚡ Node Performance</h3>
+                <div class="node-perf-list" id="node-perf-list">
+                    <!-- Bars generated dynamically -->
+                    <div style="color: var(--muted); font-size: 0.85rem; text-align: center; padding: 2rem;">Analyzing
+                        node latency...</div>
                 </div>
             </section>
         </div>
@@ -1137,6 +1161,11 @@
             const time = new Date().toLocaleTimeString('en-US', { hour12: false });
             el.innerHTML = `<span class="timestamp">[${time}]</span> <span class="log-msg">${msg}</span>`;
             t.appendChild(el);
+
+            while (t.children.length > 25) {
+                t.removeChild(t.firstChild);
+            }
+
             t.scrollTop = t.scrollHeight;
         }
 
@@ -1225,8 +1254,9 @@
         async function monitor() {
             if (isFetching) return;
             isFetching = true;
-            document.getElementById('terminal-logs').innerHTML = ''; // Clear previous logs
-            logToTerminal(`Fetching latest infrastructure health data from Agent...`, 'info');
+
+            let isNewData = false;
+
             try {
                 const data = await loadStatusData();
                 latestStatusData = data;
@@ -1234,14 +1264,23 @@
                 if (data.lastUpdated > lastKnownUpdateTime) {
                     lastKnownUpdateTime = data.lastUpdated;
                     syncServerCountdown(data);
+                    isNewData = true;
                 } else if (data.lastUpdated > 0 && countdownTime <= 0) {
                     countdownTime = 15; // Delay retry if action is still processing
-                    logToTerminal(`Waiting for updated data from Agent...`, 'warning');
                     isFetching = false;
                     return; // Prevent redundant logging until new data arrives
                 } else {
                     syncServerCountdown(data);
                 }
+
+                // Skip UI and logging updates if no new data was fetched
+                if (!isNewData && !firstLoad && lastKnownUpdateTime !== 0) {
+                    isFetching = false;
+                    return;
+                }
+
+                logToTerminal(`--- [Cycle ${new Date().toLocaleTimeString('en-US', { hour12: false })}] ---`, 'info');
+                logToTerminal(`Fetching latest infrastructure health data from Agent...`, 'info');
 
                 let onlineCount = 0;
                 let totalLatency = 0;
@@ -1249,6 +1288,9 @@
                 let slowestNode = { name: '-', latency: -1 };
 
                 downtimesToday = data.downtimesToday || 0;
+
+                const perfList = document.getElementById('node-perf-list');
+                if (perfList) perfList.innerHTML = '';
 
                 for (let i = 0; i < services.length; i++) {
                     const s = services[i];
@@ -1301,12 +1343,22 @@
 
                     updateSparkline(i, s.history, color);
 
-                    // Update Topology Node Status
-                    const topoNode = document.getElementById(`topo-${s.id}`);
-                    if (topoNode) {
-                        topoNode.className = `topo-node ${s.status === 'ONLINE' || s.status === 'DEGRADED' ? 'online' : 'offline'}`;
-                        const statEl = document.getElementById(`topo-stat-${s.id}`);
-                        if (statEl) statEl.textContent = latency !== -1 ? `${latency}ms` : 'OFFLINE';
+                    // Update Node Performance Bar
+                    if (perfList) {
+                        const item = document.createElement('div');
+                        item.className = 'node-perf-item';
+                        const maxLatencyScale = 800;
+                        let pct = latency !== -1 ? Math.min((latency / maxLatencyScale) * 100, 100) : 100;
+                        if (latency === -1) pct = 100;
+
+                        item.innerHTML = `
+                            <div class="node-perf-label" title="${s.name}">${s.name}</div>
+                            <div class="node-perf-bar-bg">
+                                <div class="node-perf-bar-fill" style="width: ${pct}%; background: ${color};"></div>
+                            </div>
+                            <div class="node-perf-value" style="color: ${color}">${latency !== -1 ? latency + 'ms' : 'FAIL'}</div>
+                        `;
+                        perfList.appendChild(item);
                     }
                 }
 
@@ -1403,7 +1455,6 @@
                 syncServerCountdown(latestStatusData);
             } else {
                 if (countdownTime > 0) countdownTime--;
-                document.getElementById('countdown-timer').textContent = countdownTime;
             }
 
             if (countdownTime <= 0) {
@@ -1416,7 +1467,6 @@
             const nextRefreshAt = data?.nextRefreshAt || (data?.lastUpdated ? data.lastUpdated + refreshIntervalMs : Date.now() + refreshIntervalMs);
             const remainingSeconds = Math.max(0, Math.ceil((nextRefreshAt - Date.now()) / 1000));
             countdownTime = remainingSeconds;
-            document.getElementById('countdown-timer').textContent = remainingSeconds;
             document.getElementById('footer-updated').textContent = `Last Updated: ${data?.lastUpdated ? new Date(data.lastUpdated).toLocaleTimeString() : '--:--'}`;
         }
 
