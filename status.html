@@ -613,6 +613,27 @@
             font-weight: 600;
         }
 
+        /* Tooltip */
+        .graph-tooltip {
+            position: fixed;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: monospace;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease-out;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transform: translate(-50%, -100%);
+            margin-top: -15px;
+            white-space: nowrap;
+        }
+
         /* Terminal */
         .terminal-section {
             padding: 0;
@@ -898,6 +919,9 @@
     <div id="spotlight"></div>
 
     <div class="app-container">
+        
+        <!-- Global Tooltip -->
+        <div id="graph-tooltip" class="graph-tooltip"></div>
 
         <!-- Header -->
         <header class="glass-panel reveal">
@@ -1236,11 +1260,51 @@
               </defs>
             `;
 
+            const hoverLine = `<line id="hover-line-${index}" x1="0" y1="0" x2="0" y2="30" stroke="rgba(255,255,255,0.4)" stroke-width="0.5" stroke-dasharray="2,2" style="display:none;"></line>`;
+
             svg.innerHTML = `
                 ${defs}
                 <path d="${dFill}" fill="url(#grad-${index})" stroke="none"></path>
                 <path d="${dLine}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+                ${hoverLine}
             `;
+
+            // Hover interactions
+            const container = svg.parentElement;
+            container.onmousemove = (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const width = rect.width;
+                const totalPoints = renderHistory.length;
+                if(totalPoints <= 1) return;
+                
+                const pointIndex = Math.min(totalPoints - 1, Math.max(0, Math.round((x / width) * (totalPoints - 1))));
+                const val = validHistory[pointIndex];
+                if (val === undefined) return;
+                
+                const tooltip = document.getElementById('graph-tooltip');
+                if (tooltip) {
+                    tooltip.style.opacity = '1';
+                    tooltip.style.left = e.clientX + 'px';
+                    tooltip.style.top = e.clientY + 'px';
+                    tooltip.innerHTML = val === 1000 ? '<span style="color:var(--danger)">OFFLINE</span>' : `<span style="color:${color}">${val}ms</span>`;
+                }
+                
+                const hLine = document.getElementById(`hover-line-${index}`);
+                if (hLine) {
+                    hLine.style.display = 'block';
+                    hLine.setAttribute('x1', pointIndex);
+                    hLine.setAttribute('x2', pointIndex);
+                }
+            };
+            
+            container.onmouseleave = () => {
+                const tooltip = document.getElementById('graph-tooltip');
+                if (tooltip) tooltip.style.opacity = '0';
+                
+                const hLine = document.getElementById(`hover-line-${index}`);
+                if (hLine) hLine.style.display = 'none';
+            };
         }
 
         async function resolveStatusDataUrl() {
